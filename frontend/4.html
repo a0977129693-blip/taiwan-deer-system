@@ -24,60 +24,59 @@
                 <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-active flex items-center">發情記錄管理</a>
             </nav>
-            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 text-right">
-                <span class="text-sm font-bold uppercase">李仲琨</span>
-            </div>
+            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 text-right"><span class="text-sm font-bold uppercase">李仲琨</span></div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto p-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 text-center">
             <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-red-400">
-                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日爬跨次數 (Mounting)</p>
-                <p id="cnt-m" class="text-3xl font-black text-red-600">0 <span class="text-xs font-normal">次</span></p>
+                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">今日爬跨累計 (Mounting)</p>
+                <p id="stat-m" class="text-3xl font-black text-red-500">0 次</p>
             </div>
             <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-amber-400">
-                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日站立發情次數 (Standing)</p>
-                <p id="cnt-s" class="text-3xl font-black text-amber-600">0 <span class="text-xs font-normal">次</span></p>
+                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">今日站立發情累計 (Standing)</p>
+                <p id="stat-s" class="text-3xl font-black text-amber-500">0 次</p>
             </div>
             <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-blue-400">
-                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日雄性追隨次數 (FO)</p>
-                <p id="cnt-f" class="text-3xl font-black text-blue-600">0 <span class="text-xs font-normal">次</span></p>
+                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">今日雄性追隨累計 (FO)</p>
+                <p id="stat-f" class="text-3xl font-black text-blue-500">0 次</p>
             </div>
             <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-green-500">
-                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日全場總活動指標</p>
-                <p class="text-3xl font-black text-green-600">8,542 <span class="text-xs font-normal text-gray-400">指標</span></p>
+                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">全場即時綜合活動量</p>
+                <p id="stat-idx" class="text-3xl font-black text-green-600">8,542</p>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 bg-white p-8 rounded-2xl card-shadow">
                 <div class="flex justify-between items-center mb-10">
-                    <h2 class="text-xl font-bold text-gray-800">歷史環境活動量波形</h2>
-                    <div class="flex items-center space-x-3">
-                        <label class="text-xs text-gray-400">選擇判定鹿隻編號：</label>
-                        <select id="deerSelect" class="bg-amber-50 border border-amber-200 text-[#8B6B4D] text-sm font-bold rounded-lg px-4 py-2 outline-none cursor-pointer"></select>
+                    <h2 class="text-xl font-bold text-gray-800">活動量波動趨勢圖</h2>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-xs text-gray-400">分析茸鹿對象：</label>
+                        <select id="deerFilter" class="bg-amber-50 border border-amber-200 text-[#8B6B4D] text-sm font-bold rounded-lg px-3 py-1.5 outline-none cursor-pointer"></select>
                     </div>
                 </div>
                 <div id="activityChart" style="width: 100%; height: 400px;"></div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl card-shadow border-l-4 border-[#8B6B4D]">
-                <h2 class="text-lg font-bold mb-6 flex items-center"><i class="fa-solid fa-list-ul mr-3 text-[#8B6B4D]"></i>YOLO 即時串流識別日誌</h2>
-                <div class="space-y-4 h-[350px] overflow-y-auto pr-2" id="logBox"></div>
-                <button id="aiBtn" class="w-full mt-6 py-4 bg-[#8B6B4D] text-white rounded-xl text-sm font-bold shadow-lg hover:bg-[#72563D] transition">調度 AI Agent 產出行為分析報告</button>
+            <div class="bg-white p-6 rounded-2xl card-shadow border-l-4 border-[#8B6B4D] flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold mb-4 flex items-center"><i class="fa-solid fa-list-ul mr-3 text-[#8B6B4D]"></i>YOLO 實時電腦視覺監測流</h2>
+                    <div class="space-y-3 h-[340px] overflow-y-auto pr-1 font-sans" id="liveLogStream"></div>
+                </div>
+                <button id="agentBtn" class="w-full mt-4 py-4 bg-[#8B6B4D] text-white rounded-xl text-sm font-bold shadow-lg hover:bg-[#72563D] transition">調度 AI Agent 產出行為專家報告</button>
             </div>
         </div>
     </main>
 
-    <div id="aiModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white w-full max-w-lg p-8 rounded-2xl shadow-2xl transform transition-all border-t-8 border-[#8B6B4D]">
+    <div id="agentModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl border-t-8 border-[#8B6B4D] mx-4 animate-fadeIn">
             <div class="flex items-center space-x-3 mb-4 text-[#8B6B4D] text-xl font-black">
-                <i class="fa-solid fa-robot text-2xl"></i>
-                <h3>應用電腦視覺 - 智能分析完成</h3>
+                <i class="fa-solid fa-robot text-2xl animate-bounce"></i><h3>電腦視覺 ＆ AI 專家智能診斷</h3>
             </div>
-            <div id="aiText" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-4 rounded-xl border border-gray-200 max-h-60 overflow-y-auto"></div>
-            <button onclick="document.getElementById('aiModal').classList.add('hidden')" class="w-full mt-6 py-3 bg-gray-800 text-white font-bold rounded-xl text-sm hover:bg-gray-900 transition">確認並關閉報告</button>
+            <div id="agentText" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-5 rounded-2xl border border-gray-100 max-h-64 overflow-y-auto font-medium"></div>
+            <button onclick="document.getElementById('agentModal').classList.add('hidden')" class="w-full mt-6 py-3 bg-gray-800 text-white font-bold rounded-xl text-sm hover:bg-gray-900 transition">關閉報告並返回主控台</button>
         </div>
     </div>
 
@@ -89,60 +88,69 @@
             tooltip: { trigger: 'axis' },
             xAxis: { type: 'category', data: ['02/11', '02/12', '02/13', '02/14', '02/15', '02/16', '02/17'] },
             yAxis: { type: 'value', min: 0, max: 300 },
-            series: [{ name: '每日總活動量', type: 'line', data: [112, 108, 125, 118, 121, 115, 110], smooth: true, lineStyle: { color: '#10b981' } }]
+            series: [{ name: '個別活動指數', type: 'line', data: [112, 108, 125, 118, 121, 115, 110], smooth: true, lineStyle: { color: '#10b981', width: 3 } }]
         });
 
-        async function loadEstrusPage() {
+        async function pollRealtimeMetrics() {
             try {
-                const resStats = await fetch(`${API_BASE}/estrus/stats`);
-                const stats = await resStats.json();
-                document.getElementById('cnt-m').innerHTML = `${stats.mounting_count} <span class="text-xs font-normal">次</span>`;
-                document.getElementById('cnt-s').innerHTML = `${stats.standing_count} <span class="text-xs font-normal">次</span>`;
-                document.getElementById('cnt-f').innerHTML = `${stats.fo_count} <span class="text-xs font-normal">次</span>`;
+                // 🛠️ 已修復：更名為 resEstrusStats 並移除了多餘的 await assignment 筆誤
+                const resEstrusStats = await fetch(`${API_BASE}/estrus/stats`);
+                const stats = await resEstrusStats.json();
+                
+                document.getElementById('stat-m').innerText = `${stats.mounting_count} 次`;
+                document.getElementById('stat-s').innerText = `${stats.standing_count} 次`;
+                document.getElementById('stat-f').innerText = `${stats.fo_count} 次`;
+                document.getElementById('stat-idx').innerText = stats.total_activity_index.toLocaleString();
 
-                const resDeer = await fetch(`${API_BASE}/deer`);
-                const deerList = await resDeer.json();
-                const select = document.getElementById('deerSelect');
-                select.innerHTML = "";
-                deerList.forEach(d => {
-                    const opt = document.createElement('option');
-                    opt.value = d.deer_id; opt.innerText = `${d.deer_id} (${d.gender})`;
-                    select.appendChild(opt);
-                });
-
-                const resLogs = await fetch(`${API_BASE}/estrus/logs`);
-                const logs = await resLogs.json();
-                const logBox = document.getElementById('logBox');
+                // 🛠️ 已更名為 resEstrusLogs 避免與其他頁面衝突
+                const resEstrusLogs = await fetch(`${API_BASE}/estrus/logs`);
+                const logs = await resEstrusLogs.json();
+                const logBox = document.getElementById('liveLogStream');
+                
                 logBox.innerHTML = logs.map(l => `
-                    <div class="p-3 bg-blue-50/70 rounded-xl border border-blue-100/50 mb-2 text-xs">
+                    <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100/40 text-xs">
                         <div class="flex justify-between font-bold text-blue-600 mb-1">
-                            <span>${l.behavior_type=='Mounting'?'爬跨/騎乘':l.behavior_type=='Standing'?'站立發情':l.behavior_type=='FO'?'雄性追隨':'日常狀態'}</span>
-                            <span class="text-gray-400 font-normal">${l.time}</span>
+                            <span>${l.behavior_type=='Mounting'?'爬跨/騎乘(Mounting)':l.behavior_type=='Standing'?'站立發情(Standing)':l.behavior_type=='FO'?'雄性追隨(FO)':l.behavior_type}</span>
+                            <span class="text-gray-400 font-mono">${l.time}</span>
                         </div>
-                        <p class="text-gray-800 font-semibold">鹿隻標籤: ${l.deer_id}</p>
-                        <p class="text-gray-400">電腦視覺行為追蹤計時: ${l.duration} 秒</p>
+                        <p class="text-gray-700 font-semibold">目標茸鹿耳標: ${l.deer_id}</p>
+                        <p class="text-gray-400 text-[11px]">特徵辨識持續時間: ${l.duration} 秒</p>
                     </div>`).join('');
-            } catch(e) { console.error(e); }
+            } catch (e) { console.error("輪詢資料失敗:", e); }
         }
 
-        document.getElementById('aiBtn').onclick = async () => {
-            const deerId = document.getElementById('deerSelect').value;
-            if (!deerId) return;
-            
-            const btn = document.getElementById('aiBtn');
-            btn.innerText = "AI 正在分析特徵軌跡中..."; btn.disabled = true;
+        async function bindDeerFilter() {
+            try {
+                const res = await fetch(`${API_BASE}/deer`);
+                const list = await res.json();
+                const sel = document.getElementById('deerFilter');
+                sel.innerHTML = "";
+                list.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.deer_id; opt.innerText = `鹿隻 ${d.deer_id} (${d.gender})`;
+                    sel.appendChild(opt);
+                });
+            } catch (e) { console.error("綁定過濾選單失敗:", e); }
+        }
+
+        document.getElementById('agentBtn').onclick = async () => {
+            const deerId = document.getElementById('deerFilter').value;
+            if(!deerId) return;
+            const btn = document.getElementById('agentBtn');
+            btn.innerText = "正在調度 AI Agent 分析行為特徵..."; btn.disabled = true;
 
             try {
                 const res = await fetch(`${API_BASE}/ai/analyze/${deerId}`, { method: 'POST' });
                 const data = await res.json();
-                
-                document.getElementById('aiText').innerText = data.report;
-                document.getElementById('aiModal').classList.remove('hidden');
-            } catch(e) { alert("Agent連線異常"); }
-            finally { btn.innerText = "調度 AI Agent 產出行為分析報告"; btn.disabled = false; }
+                document.getElementById('agentText').innerText = data.report;
+                document.getElementById('agentModal').classList.remove('hidden');
+            } catch (err) { alert("AI Agent 連線超時。"); }
+            finally { btn.innerText = "調度 AI Agent 產出行為專家報告"; btn.disabled = false; }
         };
 
-        loadEstrusPage();
+        bindDeerFilter();
+        pollRealtimeMetrics();
+        setInterval(pollRealtimeMetrics, 4000); // 每 4 秒自動同步更新
     </script>
 </body>
 </html>

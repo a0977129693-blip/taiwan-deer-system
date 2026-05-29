@@ -42,7 +42,7 @@
         <div class="flex justify-end items-center mb-8 text-sm">
             <div class="bg-white px-5 py-2 rounded-full shadow-sm text-gray-500 font-medium flex items-center border border-gray-100">
                 <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                資料更新日期：2026-02-17
+                物聯網數據流：實時監測模擬中
             </div>
         </div>
 
@@ -61,9 +61,7 @@
 
         <div class="bg-white p-8 rounded-2xl card-shadow">
             <div class="flex justify-between items-center mb-10">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                    <i class="fa-solid fa-temperature-list mr-3 text-[#8B6B4D]"></i>歷史環境溫度
-                </h2>
+                <h2 class="text-xl font-bold text-gray-800 flex items-center"><i class="fa-solid fa-temperature-list mr-3 text-[#8B6B4D]"></i>歷史環境溫度紀錄波形</h2>
             </div>
             <div id="trendChart" style="width: 100%; height: 380px;"></div>
         </div>
@@ -71,6 +69,7 @@
 
     <script>
         const API_BASE = "https://deer-backend-api.onrender.com/api";
+
         const getGaugeOption = (value, min, max, mainColor) => ({
             series: [{
                 type: 'gauge', startAngle: 200, endAngle: -20, min: min, max: max, splitNumber: 5,
@@ -85,27 +84,34 @@
         const humGauge = echarts.init(document.getElementById('humGauge'));
         const trendChart = echarts.init(document.getElementById('trendChart'));
 
-        async function loadDashboard() {
+        async function refreshDashboard() {
             try {
-                const resCurr = await fetch(`${API_BASE}/environment/current`);
-                const curr = await resCurr.json();
-                document.getElementById('tempVal').innerHTML = `${curr.temperature}<span class="text-xl ml-1 text-gray-300">°C</span>`;
-                document.getElementById('humVal').innerHTML = `${curr.humidity}<span class="text-xl ml-1 text-gray-300">%RH</span>`;
-                tempGauge.setOption(getGaugeOption(curr.temperature, 0, 50, '#3b82f6'));
-                humGauge.setOption(getGaugeOption(curr.humidity, 0, 100, '#06b6d4'));
+                const res = await fetch(`${API_BASE}/environment/current`);
+                const data = await res.json();
+                document.getElementById('tempVal').innerHTML = `${data.temperature}<span class="text-xl ml-1 text-gray-300">°C</span>`;
+                document.getElementById('humVal').innerHTML = `${data.humidity}<span class="text-xl ml-1 text-gray-300">%RH</span>`;
+                tempGauge.setOption(getGaugeOption(data.temperature, 0, 50, '#3b82f6'));
+                humGauge.setOption(getGaugeOption(data.humidity, 0, 100, '#06b6d4'));
+            } catch (err) { console.error(err); }
+        }
 
-                const resHist = await fetch(`${API_BASE}/environment/history`);
-                const hist = await resHist.json();
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${API_BASE}/environment/history`);
+                const data = await res.json();
                 trendChart.setOption({
                     tooltip: { trigger: 'axis' },
                     grid: { left: '3%', right: '4%', bottom: '5%', containLabel: true },
-                    xAxis: { type: 'category', boundaryGap: false, data: hist.times, axisLine: { lineStyle: { color: '#eee' } } },
-                    yAxis: { type: 'value', min: 15, max: 35, axisLabel: { formatter: '{value} °C', color: '#999' } },
-                    series: [{ name: '環境溫度', type: 'line', data: hist.temperatures, smooth: true, lineStyle: { width: 3, color: '#3b82f6' }, itemStyle: { color: '#3b82f6' } }]
+                    xAxis: { type: 'category', boundaryGap: false, data: data.times, axisLine: { lineStyle: { color: '#eee' } } },
+                    yAxis: { type: 'value', min: 15, max: 35, axisLabel: { formatter: '{value} °C' } },
+                    series: [{ name: '環境溫度', type: 'line', data: data.temperatures, smooth: true, lineStyle: { width: 3, color: '#3b82f6' }, itemStyle: { color: '#3b82f6' } }]
                 });
-            } catch (err) { console.error("API連線異常:", err); }
+            } catch (e) { console.error(e); }
         }
-        loadDashboard();
+
+        refreshDashboard();
+        loadHistory();
+        setInterval(refreshDashboard, 3000); // 每 3 秒動態浮動更新
         window.onresize = function() { tempGauge.resize(); humGauge.resize(); trendChart.resize(); };
     </script>
 </body>

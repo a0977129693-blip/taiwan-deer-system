@@ -9,14 +9,12 @@
     <style>
         body { background-color: #f2efea; }
         .sidebar-bg { background-color: #8B6B4D; }
-        .nav-link:hover { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; transition: all 0.2s; }
-        .nav-active { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; }
         .form-card { background-color: #ffffff; border-radius: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .input-field { width: 100%; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.875rem; }
-        .input-field:focus { outline: none; border-color: #3b82f6; }
-        .submit-btn { width: 100%; background-color: #facc15; color: #1f2937; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; }
+        .input-field { width: 100%; padding: 0.65rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.875rem; transition: all 0.2s; }
+        .input-field:focus { outline: none; border-color: #8B6B4D; ring: 2px; ring-color: #fcd34d; }
+        .submit-btn { width: 100%; background-color: #facc15; color: #1f2937; padding: 0.8rem; border-radius: 0.5rem; font-weight: bold; font-size: 1rem; box-shadow: 0 4px 6px -1px rgba(250, 204, 21, 0.2); }
         .submit-btn:hover { background-color: #eab308; }
-        label { display: block; font-size: 0.875rem; color: #4b5563; margin-bottom: 0.25rem; font-weight: 500; }
+        label { display: block; font-size: 0.875rem; color: #4b5563; margin-bottom: 0.35rem; font-weight: 600; }
     </style>
 </head>
 <body class="font-sans text-gray-700">
@@ -30,32 +28,27 @@
                 <a href="3.html" class="nav-active flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-            <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
-                <span class="text-sm font-bold uppercase">李仲琨</span>
-            </div>
+            <div class="flex items-center space-x-4 border-l border-white/20 pl-6"><span class="text-sm font-bold uppercase">李仲琨</span></div>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto p-8">
-        <div class="form-card p-10">
-            <form id="deerForm" class="space-y-6">
-                <div><label>鹿隻晶片/耳標編號</label><input type="text" id="deer_id" required class="input-field" placeholder="請輸入編號 (如: 0x9527)"></div>
-                <div><label>體重量測數據 (公斤)</label><input type="number" step="0.1" id="weight" required class="input-field" placeholder="請輸入體重數據"></div>
-                <div><label>出生日期</label><input type="date" id="birthday" required class="input-field"></div>
-                <div>
-                    <label>性別</label>
-                    <select id="gender" class="input-field bg-white"><option value="公鹿">公鹿</option><option value="母鹿">母鹿</option></select>
-                </div>
+    <main class="max-w-3xl mx-auto p-8">
+        <div class="form-card p-8 md:p-12">
+            <form id="profileForm" class="space-y-6">
+                <div><label>鹿隻識別碼 (耳標/晶片號)</label><input type="text" id="deer_id" required class="input-field" placeholder="例如: 0x8183"></div>
+                <div><label>實測體重數據 (公斤)</label><input type="number" step="0.01" id="weight" required class="input-field" placeholder="請輸入體重數據"></div>
+                <div><label>出生日期紀錄</label><input type="date" id="birthday" required class="input-field"></div>
+                <div><label>性別分類</label><select id="gender" class="input-field bg-white"><option value="母鹿">母鹿</option><option value="公鹿">公鹿</option></select></div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label>遺傳血統：父畜編號 (動態選單)</label><select id="father_id" class="input-field bg-white"><option>無</option></select></div>
-                    <div><label>遺傳血統：母畜編號 (動態選單)</label><select id="mother_id" class="input-field bg-white"><option>無</option></select></div>
+                    <div><label>遺傳親代：父畜耳標 (自動聯動)</label><select id="father_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
+                    <div><label>遺傳親代：母畜耳標 (自動聯動)</label><select id="mother_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
                 </div>
-                <div><label>歷史累計繁育成功胎次</label><input type="number" id="breeding_count" class="input-field" value="0"></div>
-                <div>
-                    <label>分配欄位</label>
-                    <select id="pen_id" class="input-field bg-white"><option value="A1">A1 欄位</option><option value="B1">B1 欄位</option><option value="C1">C1 欄位</option></select>
-                </div>
-                <div class="pt-4"><button type="submit" class="submit-btn text-lg shadow-md">送出履歷登記資料</button></div>
+                
+                <div><label>累計繁育成功胎次 (次)</label><input type="number" id="breeding_count" class="input-field" value="0" min="0"></div>
+                <div><label>指定配置管理欄位</label><select id="pen_id" class="input-field bg-white"><option value="A1">A1 欄位 (公鹿區)</option><option value="B1">B1 欄位 (母鹿區)</option><option value="C1">C1 欄位 (隔離區)</option></select></div>
+                
+                <div class="pt-2"><button type="submit" class="submit-btn transition">送出履歷並同步至 Supabase 雲端</button></div>
             </form>
         </div>
     </main>
@@ -63,23 +56,23 @@
     <script>
         const API_BASE = "https://deer-backend-api.onrender.com/api";
 
-        async function syncParentsDropdown() {
+        async function populateParentsDropdown() {
             try {
                 const res = await fetch(`${API_BASE}/deer`);
                 const list = await res.json();
-                const fSelect = document.getElementById('father_id');
-                const mSelect = document.getElementById('mother_id');
+                const fDropdown = document.getElementById('father_id');
+                const mDropdown = document.getElementById('mother_id');
 
-                list.forEach(d => {
+                list.forEach(deer => {
                     const opt = document.createElement('option');
-                    opt.value = d.deer_id; opt.innerText = d.deer_id;
-                    if (d.gender === "公鹿") fSelect.appendChild(opt);
-                    else mSelect.appendChild(opt.cloneNode(true));
+                    opt.value = deer.deer_id; opt.innerText = `鹿隻 ${deer.deer_id}`;
+                    if(deer.gender === "公鹿") fDropdown.appendChild(opt);
+                    else mDropdown.appendChild(opt.cloneNode(true));
                 });
-            } catch(e) { console.error("父群代同步失敗:", e); }
+            } catch (e) { console.error("加載血統樹失敗:", e); }
         }
 
-        document.getElementById('deerForm').onsubmit = async (e) => {
+        document.getElementById('profileForm').onsubmit = async (e) => {
             e.preventDefault();
             const payload = {
                 deer_id: document.getElementById('deer_id').value,
@@ -92,14 +85,20 @@
                 pen_id: document.getElementById('pen_id').value
             };
 
-            const res = await fetch(`${API_BASE}/deer`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) { alert("🎉 成功將最新茸鹿履歷資料同步至 Supabase 資料庫！"); document.getElementById('deerForm').reset(); }
-            else { alert("登記失敗，請重新確認格式。"); }
+            try {
+                const res = await fetch(`${API_BASE}/deer`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if(res.ok) {
+                    alert("🎉 台灣茸鹿資料已無縫寫入 Supabase 雲端生產環境！");
+                    document.getElementById('profileForm').reset();
+                    location.reload();
+                } else { alert("寫入發生衝突，請檢查欄位。"); }
+            } catch (err) { alert("無法連線至 Render 雲端後端。"); }
         };
-        syncParentsDropdown();
+
+        populateParentsDropdown();
     </script>
 </body>
 </html>
