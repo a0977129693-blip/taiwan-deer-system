@@ -86,7 +86,13 @@ class BehaviorLogModel(Base):
     confidence = Column(Float)
     detected_at = Column(DateTime, default=datetime.datetime.utcnow)
 
-Base.metadata.create_all(bind=engine)
+# 啟動時嘗試建立資料表，失敗只警告不崩潰
+try:
+    Base.metadata.create_all(bind=engine)
+    logger.info("✅  資料表同步完成")
+except Exception as e:
+    logger.error(f"⚠️  資料表建立失敗：{e}")
+    logger.error("請確認 DATABASE_URL 需使用 Supabase Session Mode 連線字串（pooler.supabase.com）")
 
 def get_db():
     db = SessionLocal()
