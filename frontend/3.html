@@ -12,9 +12,9 @@
         .nav-link:hover { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; transition: all 0.2s; }
         .nav-active { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; }
         .form-card { background-color: #ffffff; border-radius: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .input-field { width: 100%; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.875rem; transition: border-color 0.2s; }
-        .input-field:focus { outline: none; border-color: #3b82f6; ring: 2px; ring-color: #dbeafe; }
-        .submit-btn { width: 100%; background-color: #facc15; color: #1f2937; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; transition: background-color 0.2s; }
+        .input-field { width: 100%; padding: 0.6rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.875rem; }
+        .input-field:focus { outline: none; border-color: #3b82f6; }
+        .submit-btn { width: 100%; background-color: #facc15; color: #1f2937; padding: 0.75rem; border-radius: 0.5rem; font-weight: bold; }
         .submit-btn:hover { background-color: #eab308; }
         label { display: block; font-size: 0.875rem; color: #4b5563; margin-bottom: 0.25rem; font-weight: 500; }
     </style>
@@ -23,135 +23,83 @@
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
         <div class="px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
-            </div>
-
+            <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
                 <a href="3.html" class="nav-active flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
-                <div class="text-right">
-                    <p class="text-[10px] opacity-60">jush123 已登入</p>
-                    <p class="text-sm font-bold uppercase">李仲琨</p>
-                </div>
-                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                    <i class="fa-solid fa-user text-[#8B6B4D]"></i>
-                </div>
+                <span class="text-sm font-bold uppercase">李仲琨</span>
             </div>
         </div>
     </header>
 
     <main class="max-w-4xl mx-auto p-8">
         <div class="form-card p-10">
-            <form class="space-y-6">
-                <div>
-                    <label>鹿隻編號</label>
-                    <input type="text" class="input-field" placeholder="請輸入編號">
-                </div>
-
-                <div>
-                    <label>體重 (公斤)</label>
-                    <input type="number" step="0.1" class="input-field" placeholder="請輸入體重數據">
-                </div>
-
-                <div>
-                    <label>鹿隻出生日期</label>
-                    <div class="relative">
-                        <input type="text" class="input-field" placeholder="年/月/日">
-                        <i class="fa-regular fa-calendar absolute right-3 top-3 text-gray-400"></i>
-                    </div>
-                </div>
-
+            <form id="deerForm" class="space-y-6">
+                <div><label>鹿隻晶片/耳標編號</label><input type="text" id="deer_id" required class="input-field" placeholder="請輸入編號 (如: 0x9527)"></div>
+                <div><label>體重量測數據 (公斤)</label><input type="number" step="0.1" id="weight" required class="input-field" placeholder="請輸入體重數據"></div>
+                <div><label>出生日期</label><input type="date" id="birthday" required class="input-field"></div>
                 <div>
                     <label>性別</label>
-                    <select class="input-field appearance-none bg-white">
-                        <option value="公鹿">公鹿</option>
-                        <option value="母鹿">母鹿</option>
-                    </select>
+                    <select id="gender" class="input-field bg-white"><option value="公鹿">公鹿</option><option value="母鹿">母鹿</option></select>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label>父畜編號</label>
-                        <select class="input-field appearance-none bg-white">
-                            <option>請選擇父畜</option>
-                            <option>TW-DEER-M001</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>母畜編號</label>
-                        <select class="input-field appearance-none bg-white">
-                            <option>請選擇母畜</option>
-                            <option>TW-DEER-F001</option>
-                        </select>
-                    </div>
+                    <div><label>遺傳血統：父畜編號 (動態選單)</label><select id="father_id" class="input-field bg-white"><option>無</option></select></div>
+                    <div><label>遺傳血統：母畜編號 (動態選單)</label><select id="mother_id" class="input-field bg-white"><option>無</option></select></div>
                 </div>
-
+                <div><label>歷史累計繁育成功胎次</label><input type="number" id="breeding_count" class="input-field" value="0"></div>
                 <div>
-                    <label>配種次數</label>
-                    <input type="number" class="input-field" placeholder="0">
+                    <label>分配欄位</label>
+                    <select id="pen_id" class="input-field bg-white"><option value="A1">A1 欄位</option><option value="B1">B1 欄位</option><option value="C1">C1 欄位</option></select>
                 </div>
-
-                <div>
-                    <label>欄位編號</label>
-                    <select class="input-field appearance-none bg-white">
-                        <option>請選擇欄位</option>
-                        <option>A1</option>
-                        <option>B1</option>
-                    </select>
-                </div>
-
-                <div class="pt-4">
-                    <button type="submit" class="submit-btn text-lg shadow-md">送 出</button>
-                </div>
+                <div class="pt-4"><button type="submit" class="submit-btn text-lg shadow-md">送出履歷登記資料</button></div>
             </form>
         </div>
     </main>
 
-    <footer class="py-12 text-center text-gray-400 text-[10px] tracking-[0.3em] uppercase">
-        © 2026 應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統
-    </footer>
+    <script>
+        const API_BASE = "https://deer-backend-api.onrender.com/api";
 
-<script>
-    const API_BASE = "https://deer-backend-api.onrender.com/api";
-    const form = document.querySelector('form');
+        async function syncParentsDropdown() {
+            try {
+                const res = await fetch(`${API_BASE}/deer`);
+                const list = await res.json();
+                const fSelect = document.getElementById('father_id');
+                const mSelect = document.getElementById('mother_id');
 
-    form.onsubmit = async (e) => {
-        e.preventDefault();
-        
-        const payload = {
-            deer_id: document.querySelector('input[placeholder="請輸入編號"]').value,
-            weight: parseFloat(document.querySelector('input[placeholder="請輸入體重數據"]').value),
-            birthday: document.querySelector('input[placeholder="年/月/日"]').value.replace(/\//g, '-'),
-            gender: document.querySelector('select').value,
-            father_id: document.querySelectorAll('select')[1].value,
-            mother_id: document.querySelectorAll('select')[2].value,
-            breeding_count: parseInt(document.querySelector('input[placeholder="0"]').value) || 0,
-            pen_id: document.querySelectorAll('select')[3].value
-        };
+                list.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.deer_id; opt.innerText = d.deer_id;
+                    if (d.gender === "公鹿") fSelect.appendChild(opt);
+                    else mSelect.appendChild(opt.cloneNode(true));
+                });
+            } catch(e) { console.error("父群代同步失敗:", e); }
+        }
 
-        try {
+        document.getElementById('deerForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const payload = {
+                deer_id: document.getElementById('deer_id').value,
+                weight: parseFloat(document.getElementById('weight').value),
+                birthday: document.getElementById('birthday').value,
+                gender: document.getElementById('gender').value,
+                father_id: document.getElementById('father_id').value,
+                mother_id: document.getElementById('mother_id').value,
+                breeding_count: parseInt(document.getElementById('breeding_count').value) || 0,
+                pen_id: document.getElementById('pen_id').value
+            };
+
             const res = await fetch(`${API_BASE}/deer`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            const data = await res.json();
-            if(res.ok) {
-                alert("🎉 台灣鹿隻履歷成功寫入 Supabase 雲端資料庫！");
-                form.reset();
-            } else {
-                alert(`登記失敗: ${data.detail}`);
-            }
-        } catch (err) {
-            alert("連線後端伺服器失敗，請確認後端是否啟動。");
-        }
-    };
-</script>
+            if (res.ok) { alert("🎉 成功將最新茸鹿履歷資料同步至 Supabase 資料庫！"); document.getElementById('deerForm').reset(); }
+            else { alert("登記失敗，請重新確認格式。"); }
+        };
+        syncParentsDropdown();
+    </script>
 </body>
 </html>

@@ -3,180 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 鹿舍總攬</title>
+    <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 鹿舍總覽</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         body { background-color: #f2efea; }
         .sidebar-bg { background-color: #8B6B4D; }
         .nav-link:hover { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; transition: all 0.2s; }
         .nav-active { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; }
-        .deer-btn { transition: all 0.2s; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .deer-btn:hover { background-color: #2563eb; color: white; transform: translateY(-1px); }
-        .deer-btn-active { background-color: #3b82f6; color: white; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); }
+        .deer-btn { transition: all 0.2s; border: 1px solid rgba(139, 107, 77, 0.2); }
+        .deer-btn:hover { background-color: #8B6B4D; color: white; }
+        .deer-btn-active { background-color: #8B6B4D; color: white; font-weight: bold; }
+        .tab-active { color: #3b82f6; border-b-2: 2px solid #3b82f6; font-weight: bold; }
     </style>
 </head>
 <body class="font-sans text-gray-700">
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
         <div class="px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
-            </div>
-            
+            <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-active flex items-center">鹿舍總覽</a>
                 <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-            
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
-                <div class="text-right">
-                    <p class="text-[10px] opacity-60">jush123 已登入</p>
-                    <p class="text-sm font-bold uppercase">李仲琨</p>
-                </div>
-                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                    <i class="fa-solid fa-user text-[#8B6B4D]"></i>
-                </div>
+                <div class="text-right"><p class="text-sm font-bold">李仲琨</p></div>
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto p-8 flex space-x-8">
-        
         <div class="w-64 flex-shrink-0">
-            <div class="bg-white/50 p-4 rounded-2xl border border-gray-200 shadow-sm">
+            <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
                 <h3 class="text-center font-bold text-gray-500 mb-3 border-b pb-2">公鹿區域</h3>
-                <div class="grid grid-cols-1 gap-2 mb-6">
-                    <button class="deer-btn-active deer-btn py-2 rounded-lg text-sm text-center">公鹿 1</button>
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 2</button>
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 3</button>
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 4</button>
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 5</button>
-                </div>
-
+                <div id="maleBox" class="grid grid-cols-1 gap-2 mb-6"></div>
                 <h3 class="text-center font-bold text-gray-500 mb-3 border-b pb-2">母鹿區域</h3>
-                <div class="grid grid-cols-1 gap-2 mb-6">
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">母鹿 1</button>
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">母鹿 2</button>
-                </div>
-
-                <h3 class="text-center font-bold text-gray-500 mb-3 border-b pb-2">特別區域</h3>
-                <div class="grid grid-cols-1 gap-2">
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">種鹿 1</button>
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">小鹿 1</button>
-                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">小鹿 2</button>
-                </div>
+                <div id="femaleBox" class="grid grid-cols-1 gap-2"></div>
             </div>
         </div>
 
         <div class="flex-1">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="flex border-b">
-                    <button class="px-8 py-4 text-blue-600 border-b-2 border-blue-600 font-bold text-sm">公鹿1鹿隻資料</button>
-                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1發情資料</button>
-                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1活動量資料</button>
-                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1配種資料</button>
-                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1即時監控介面</button>
+                <div class="flex border-b" id="tabHeader">
+                    <button onclick="switchTab('profile')" id="tab-profile" class="px-6 py-4 text-sm font-medium border-b-2 border-blue-600 text-blue-600">鹿隻基本履歷</button>
+                    <button onclick="switchTab('estrus')" id="tab-estrus" class="px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-gray-600">視覺發情紀錄</button>
+                    <button onclick="switchTab('activity')" id="tab-activity" class="px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-gray-600">核心行為時間佔比</button>
+                    <button onclick="switchTab('breeding')" id="tab-breeding" class="px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-gray-600">歷年繁殖配種</button>
+                    <button onclick="switchTab('monitor')" id="tab-monitor" class="px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-400 hover:text-gray-600">即時串流影像模擬</button>
                 </div>
 
-                <div class="p-6">
-                    <div class="flex justify-end mb-4">
-                        <div class="relative w-64">
-                            <input type="text" placeholder="搜尋關鍵字" class="w-full pl-4 pr-10 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
-                            <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-300"></i>
-                        </div>
-                    </div>
-
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr class="text-gray-400 border-b">
-                                <th class="pb-4 font-semibold px-4">公鹿1資料</th>
-                                <th class="pb-4 font-semibold px-4">紀錄日期</th>
-                                <th class="pb-4 font-semibold px-4">量測數據</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-gray-600">
-                            <tr class="border-b hover:bg-gray-50 transition">
-                                <td class="py-4 px-4 font-mono">鹿隻編號: 0x8210</td>
-                                <td class="py-4 px-4 text-gray-400">2026-02-10</td>
-                                <td class="py-4 px-4 font-bold">85 kg</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div class="p-6" id="tabContent"></div>
             </div>
         </div>
     </main>
 
-    <footer class="py-10 text-center text-gray-400 text-[10px] tracking-[0.3em] uppercase">
-        © 2026 應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統
-    </footer>
+    <script>
+        const API_BASE = "https://deer-backend-api.onrender.com/api";
+        let allDeer = [];
+        let currentDeerId = "";
+        let currentTab = "profile";
 
-<script>
-    const API_BASE = "https://deer-backend-api.onrender.com/api";
-    let allDeerData = [];
-
-    async function loadDeerSelection() {
-        try {
-            const res = await fetch(`${API_BASE}/deer`);
-            allDeerData = await res.json();
-            
-            const maleContainer = document.querySelector('.bg-white\\/50 .grid');
-            const femaleContainer = document.querySelectorAll('.bg-white\\/50 .grid')[1];
-            
-            maleContainer.innerHTML = "";
-            femaleContainer.innerHTML = "";
-
-            allDeerData.forEach(deer => {
-                const btn = document.createElement('button');
-                btn.className = "bg-white deer-btn py-2 rounded-lg text-sm text-center";
-                btn.innerText = deer.gender === "公鹿" ? `公鹿 (${deer.deer_id})` : `母鹿 (${deer.deer_id})`;
-                btn.onclick = () => renderDeerTable(deer.deer_id);
+        async function initPage() {
+            try {
+                const res = await fetch(`${API_BASE}/deer`);
+                allDeer = await res.json();
                 
-                if(deer.gender === "公鹿") {
-                    maleContainer.appendChild(btn);
-                } else {
-                    femaleContainer.appendChild(btn);
-                }
-            });
+                const mBox = document.getElementById('maleBox');
+                const fBox = document.getElementById('femaleBox');
+                mBox.innerHTML = ""; fBox.innerHTML = "";
 
-            if(allDeerData.length > 0) {
-                renderDeerTable(allDeerData[0].deer_id);
-            }
-        } catch (err) {
-            console.error("載入鹿隻列表失敗", err);
+                allDeer.forEach((deer, idx) => {
+                    const btn = document.createElement('button');
+                    btn.id = `btn-${deer.deer_id}`;
+                    btn.className = "bg-white deer-btn py-2 rounded-lg text-sm text-center font-mono";
+                    btn.innerText = `${deer.deer_id} (${deer.gender})`;
+                    btn.onclick = () => selectDeer(deer.deer_id);
+                    
+                    if (deer.gender === "公鹿") mBox.appendChild(btn);
+                    else fBox.appendChild(btn);
+                    
+                    if (idx === 0) currentDeerId = deer.deer_id;
+                });
+
+                if (currentDeerId) selectDeer(currentDeerId);
+            } catch(e) { console.error(e); }
         }
-    }
 
-    function renderDeerTable(deerId) {
-        const deer = allDeerData.find(d => d.deer_id === deerId);
-        if(!deer) return;
+        function selectDeer(id) {
+            currentDeerId = id;
+            document.querySelectorAll('.deer-btn').forEach(b => b.classList.remove('deer-btn-active'));
+            const activeBtn = document.getElementById(`btn-${id}`);
+            if (activeBtn) activeBtn.classList.add('deer-btn-active');
+            renderCurrentTab();
+        }
 
-        document.querySelector('.px-8.py-4.text-blue-600').innerText = `${deer.gender === '公鹿'?'公鹿':'母鹿'}(${deer.deer_id}) 資料`;
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.querySelectorAll('#tabHeader button').forEach(b => {
+                b.classList.remove('text-blue-600', 'border-blue-600');
+                b.classList.add('text-gray-400', 'border-transparent');
+            });
+            const activeTabBtn = document.getElementById(`tab-${tabName}`);
+            activeTabBtn.classList.remove('text-gray-400', 'border-transparent');
+            activeTabBtn.classList.add('text-blue-600', 'border-blue-600');
+            renderCurrentTab();
+        }
 
-        const tbody = document.querySelector('tbody');
-        tbody.innerHTML = `
-            <tr class="border-b hover:bg-gray-50 transition">
-                <td class="py-4 px-4 font-mono">鹿隻編號: ${deer.deer_id}</td>
-                <td class="py-4 px-4 text-gray-400">體重指標</td>
-                <td class="py-4 px-4 font-bold">${deer.weight} kg</td>
-            </tr>
-            <tr class="border-b hover:bg-gray-50 transition">
-                <td class="py-4 px-4 font-mono">出生日期: ${deer.birthday}</td>
-                <td class="py-4 px-4 text-gray-400">所屬欄位編號</td>
-                <td class="py-4 px-4 font-bold">${deer.pen_id || '未分配'}</td>
-            </tr>
-            <tr class="border-b hover:bg-gray-50 transition">
-                <td class="py-4 px-4 font-mono">累計成功配種次數</td>
-                <td class="py-4 px-4 text-gray-400">遺傳父畜/母畜</td>
-                <td class="py-4 px-4 font-bold">父: ${deer.father_id || '不詳'} / 母: ${deer.mother_id || '不詳'} (共 ${deer.breeding_count} 次)</td>
-            </tr>
-        `;
-    }
+        async function renderCurrentTab() {
+            const container = document.getElementById('tabContent');
+            const deer = allDeer.find(d => d.deer_id === currentDeerId);
+            if (!deer) return;
 
-    loadDeerSelection();
-</script>
+            if (currentTab === "profile") {
+                container.innerHTML = `
+                    <table class="w-full text-left text-sm border-collapse">
+                        <tbody class="text-gray-600">
+                            <tr class="border-b"><td class="py-4 font-mono font-bold">鹿隻識別編號</td><td class="py-4 font-mono">${deer.deer_id}</td></tr>
+                            <tr class="border-b"><td class="py-4 font-bold">量測體重數據</td><td>${deer.weight} kg</td></tr>
+                            <tr class="border-b"><td class="py-4 font-bold">出生日期登記</td><td>${deer.birthday}</td></tr>
+                            <tr class="border-b"><td class="py-4 font-bold">遺傳血統親代</td><td>父畜: ${deer.father_id || '無'} / 母畜: ${deer.mother_id || '無'}</td></tr>
+                            <tr class="border-b"><td class="py-4 font-bold">配置管理欄位</td><td>${deer.pen_id} 欄位</td></tr>
+                        </tbody>
+                    </table>`;
+            } 
+            else if (currentTab === "estrus") {
+                const res = await fetch(`${API_BASE}/deer/${currentDeerId}/details?tab=estrus`);
+                const data = await res.json();
+                let rows = data.map(r => `<tr class="border-b">
+                    <td class="py-3 font-mono text-red-500 font-bold">${r.event === 'Mounting'?'爬跨/騎乘(Mounting)':'雄性追隨(FO)'}</td>
+                    <td class="py-3">${r.time}</td>
+                    <td class="py-3 font-mono">${(r.conf * 100).toFixed(0)}%</td>
+                </tr>`).join('');
+                container.innerHTML = rows ? `
+                    <table class="w-full text-left text-sm">
+                        <thead><tr class="text-gray-400 border-b"><th class="pb-2">特徵識別事件</th><th class="pb-2">偵測時間點</th><th class="pb-2">模型信心度</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>` : `<p class="text-gray-400 text-center py-8">今日未偵測到該鹿隻之發情相關特異行為特徵。</p>`;
+            }
+            else if (currentTab === "activity") {
+                container.innerHTML = `<div id="pieBox" style="width:100%; height:350px;"></div>`;
+                const res = await fetch(`${API_BASE}/deer/${currentDeerId}/details?tab=activity`);
+                const data = await res.json();
+                
+                const myChart = echarts.init(document.getElementById('pieBox'));
+                myChart.setOption({
+                    tooltip: { trigger: 'item', formatter: '{b}: {c} 秒 ({d}%)' },
+                    legend: { bottom: '0%' },
+                    series: [{
+                        type: 'pie', radius: '60%', data: data,
+                        label: { show: true, formatter: '{b}\n({d}%)' }
+                    }]
+                });
+            }
+            else if (currentTab === "breeding") {
+                const res = await fetch(`${API_BASE}/deer/${currentDeerId}/details?tab=breeding`);
+                const data = await res.json();
+                let rows = data.map(r => `<tr class="border-b"><td class="py-3 font-bold">第 ${r.index} 胎次配種</td><td>${r.date}</td><td class="text-green-600 font-bold">${r.status}</td></tr>`).join('');
+                container.innerHTML = rows ? `<table class="w-full text-left text-sm"><tbody>${rows}</tbody></table>` : `<p class="text-gray-400 text-center py-8">無配種繁育歷史紀錄。</p>`;
+            }
+            else if (currentTab === "monitor") {
+                container.innerHTML = `
+                    <div class="relative bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center border-4 border-gray-800">
+                        <div class="absolute top-4 left-4 bg-red-600 text-white text-xs px-2 py-1 rounded font-bold animate-pulse">● LIVE RTSP FEED</div>
+                        <div class="absolute top-4 right-4 bg-black/60 text-white text-xs px-2 py-1 rounded font-mono">CAM_ID: ${deer.pen_id}_YOLO</div>
+                        <div class="text-center text-gray-500">
+                            <i class="fa-solid fa-cow text-5xl mb-3 animate-bounce"></i>
+                            <p class="text-sm tracking-wider">正在載入場域智慧視覺偵測流... (鹿隻 ${deer.deer_id} 追蹤中)</p>
+                        </div>
+                    </div>`;
+            }
+        }
+        initPage();
+    </script>
 </body>
 </html>

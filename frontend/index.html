@@ -19,25 +19,19 @@
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
         <div class="px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div>
-                    <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
-                </div>
-            </div>
-
+            <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-active flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
                 <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
                 <div class="text-right">
                     <p class="text-[10px] opacity-60">jush123 已登入</p>
                     <p class="text-sm font-bold uppercase">李仲琨</p>
                 </div>
-                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center cursor-pointer shadow-inner hover:bg-amber-200 transition">
+                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center cursor-pointer shadow-inner">
                     <i class="fa-solid fa-user text-[#8B6B4D]"></i>
                 </div>
             </div>
@@ -45,7 +39,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto p-8">
-        
         <div class="flex justify-end items-center mb-8 text-sm">
             <div class="bg-white px-5 py-2 rounded-full shadow-sm text-gray-500 font-medium flex items-center border border-gray-100">
                 <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
@@ -57,13 +50,12 @@
             <div class="bg-white p-8 rounded-2xl card-shadow flex flex-col items-center border-t-4 border-blue-400">
                 <h3 class="font-bold text-gray-400 text-xs uppercase tracking-widest mb-4">環境溫度 °C</h3>
                 <div id="tempGauge" style="width: 320px; height: 240px;"></div>
-                <div class="text-5xl font-black text-blue-500 mt-[-30px]">19.5<span class="text-xl ml-1 text-gray-300">°C</span></div>
+                <div id="tempVal" class="text-5xl font-black text-blue-500 mt-[-30px]">19.5<span class="text-xl ml-1 text-gray-300">°C</span></div>
             </div>
-
             <div class="bg-white p-8 rounded-2xl card-shadow flex flex-col items-center border-t-4 border-cyan-400">
                 <h3 class="font-bold text-gray-400 text-xs uppercase tracking-widest mb-4">環境濕度 %RH</h3>
                 <div id="humGauge" style="width: 320px; height: 240px;"></div>
-                <div class="text-5xl font-black text-cyan-500 mt-[-30px]">62.8<span class="text-xl ml-1 text-gray-300">%RH</span></div>
+                <div id="humVal" class="text-5xl font-black text-cyan-500 mt-[-30px]">62.8<span class="text-xl ml-1 text-gray-300">%RH</span></div>
             </div>
         </div>
 
@@ -77,75 +69,44 @@
         </div>
     </main>
 
-    <footer class="py-12 text-center text-gray-400 text-[10px] tracking-[0.3em] uppercase">
-        © 2026 應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統
-    </footer>
-
     <script>
-    const API_BASE = "https://deer-backend-api.onrender.com/api";
+        const API_BASE = "https://deer-backend-api.onrender.com/api";
+        const getGaugeOption = (value, min, max, mainColor) => ({
+            series: [{
+                type: 'gauge', startAngle: 200, endAngle: -20, min: min, max: max, splitNumber: 5,
+                axisLine: { lineStyle: { width: 10, color: [[0.3, '#67c23a'], [0.7, mainColor], [1, '#f56c6c']] } },
+                pointer: { icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z', length: '60%', width: 6, offsetCenter: [0, '5%'], itemStyle: { color: mainColor } },
+                axisTick: { show: true, distance: -20, length: 5 }, splitLine: { show: true, distance: -25, length: 10 },
+                axisLabel: { show: true, distance: -12, color: '#bbb', fontSize: 10 }, detail: { show: false }, data: [{ value: value }]
+            }]
+        });
 
-    const getGaugeOption = (value, min, max, mainColor) => ({
-        series: [{
-            type: 'gauge',
-            startAngle: 200,
-            endAngle: -20,
-            min: min,
-            max: max,
-            splitNumber: 5,
-            axisLine: {
-                lineStyle: {
-                    width: 10,
-                    color: [[0.3, '#67c23a'], [0.7, mainColor], [1, '#f56c6c']]
-                }
-            },
-            pointer: { icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z', length: '60%', width: 6, offsetCenter: [0, '5%'], itemStyle: { color: mainColor } },
-            axisTick: { show: true, distance: -20, length: 5 },
-            splitLine: { show: true, distance: -25, length: 10 },
-            axisLabel: { show: true, distance: -12, color: '#bbb', fontSize: 10 },
-            detail: { show: false },
-            data: [{ value: value }]
-        }]
-    });
+        const tempGauge = echarts.init(document.getElementById('tempGauge'));
+        const humGauge = echarts.init(document.getElementById('humGauge'));
+        const trendChart = echarts.init(document.getElementById('trendChart'));
 
-    const tempGauge = echarts.init(document.getElementById('tempGauge'));
-    const humGauge = echarts.init(document.getElementById('humGauge'));
-    const trendChart = echarts.init(document.getElementById('trendChart'));
+        async function loadDashboard() {
+            try {
+                const resCurr = await fetch(`${API_BASE}/environment/current`);
+                const curr = await resCurr.json();
+                document.getElementById('tempVal').innerHTML = `${curr.temperature}<span class="text-xl ml-1 text-gray-300">°C</span>`;
+                document.getElementById('humVal').innerHTML = `${curr.humidity}<span class="text-xl ml-1 text-gray-300">%RH</span>`;
+                tempGauge.setOption(getGaugeOption(curr.temperature, 0, 50, '#3b82f6'));
+                humGauge.setOption(getGaugeOption(curr.humidity, 0, 100, '#06b6d4'));
 
-    async function loadDashboardData() {
-        try {
-            const resCurrent = await fetch(`${API_BASE}/environment/current`);
-            const currentData = await resCurrent.json();
-            
-            document.querySelector('.text-5xl.font-black.text-blue-500').innerHTML = `${currentData.temperature}<span class="text-xl ml-1 text-gray-300">°C</span>`;
-            document.querySelector('.text-5xl.font-black.text-cyan-500').innerHTML = `${currentData.humidity}<span class="text-xl ml-1 text-gray-300">%RH</span>`;
-            tempGauge.setOption(getGaugeOption(currentData.temperature, 0, 50, '#3b82f6'));
-            humGauge.setOption(getGaugeOption(currentData.humidity, 0, 100, '#06b6d4'));
-
-            const resHistory = await fetch(`${API_BASE}/environment/history`);
-            const historyData = await resHistory.json();
-            
-            trendChart.setOption({
-                tooltip: { trigger: 'axis' },
-                grid: { left: '3%', right: '4%', bottom: '5%', containLabel: true },
-                xAxis: { type: 'category', boundaryGap: false, data: historyData.times, axisLine: { lineStyle: { color: '#eee' } } },
-                yAxis: { type: 'value', min: 15, max: 35, axisLabel: { formatter: '{value} °C', color: '#999' } },
-                series: [{
-                    name: '環境溫度',
-                    type: 'line',
-                    data: historyData.temperatures,
-                    smooth: true,
-                    lineStyle: { width: 3, color: '#3b82f6' },
-                    itemStyle: { color: '#3b82f6' },
-                    areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(59, 130, 246, 0.2)' }, { offset: 1, color: 'rgba(59, 130, 246, 0)' }]) }
-                }]
-            });
-        } catch (error) {
-            console.error("無法連線後端 API:", error);
+                const resHist = await fetch(`${API_BASE}/environment/history`);
+                const hist = await resHist.json();
+                trendChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    grid: { left: '3%', right: '4%', bottom: '5%', containLabel: true },
+                    xAxis: { type: 'category', boundaryGap: false, data: hist.times, axisLine: { lineStyle: { color: '#eee' } } },
+                    yAxis: { type: 'value', min: 15, max: 35, axisLabel: { formatter: '{value} °C', color: '#999' } },
+                    series: [{ name: '環境溫度', type: 'line', data: hist.temperatures, smooth: true, lineStyle: { width: 3, color: '#3b82f6' }, itemStyle: { color: '#3b82f6' } }]
+                });
+            } catch (err) { console.error("API連線異常:", err); }
         }
-    }
-
-    loadDashboardData();
-    window.onresize = function() { tempGauge.resize(); humGauge.resize(); trendChart.resize(); };
-</script>
+        loadDashboard();
+        window.onresize = function() { tempGauge.resize(); humGauge.resize(); trendChart.resize(); };
+    </script>
 </body>
 </html>
