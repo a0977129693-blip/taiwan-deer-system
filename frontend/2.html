@@ -161,10 +161,37 @@
                     </table>` : `<p class="text-gray-400 text-center py-8">該個體目前尚無成功孕產胎次紀錄。</p>`;
             }
             else if(activeTab === "monitor") {
+                // 🛠️ 【核心配置】：請將下方的影片ID，替換為你 Google 雲端影片的真實 /preview 網址
+                const deerVideos = {
+                    "0x8210": "https://drive.google.com/file/d/1FMrobovQ6iZmxnW7OKSe3GDuFfRSyJOT/preview", // 貼上公鹿 0x8210 的雲端網址
+                    "0x7273": "https://drive.google.com/file/d/1FMrobovQ6iZmxnW7OKSe3GDuFfRSyJOT/preview", // 貼上母鹿 0x7273 的雲端網址
+                    "0x8177": "https://drive.google.com/file/d/1FMrobovQ6iZmxnW7OKSe3GDuFfRSyJOT/preview", // 貼上公鹿 0x8177 的雲端網址
+                    "0x8183": "https://drive.google.com/file/d/1FMrobovQ6iZmxnW7OKSe3GDuFfRSyJOT/preview"  // 貼上母鹿 0x8183 的雲端網址
+                };
+
+                // 兜底預設網址：如果找不到該耳標號，就播放對照表內的第一個影片
+                const currentVideoUrl = deerVideos[activeDeerId] || "https://www.w3schools.com/html/mov_bbb.mp4";
+
+                let mediaTag = "";
+                // 判斷是否為 Google Drive 雲端嵌入連結，自動切換成高相容性的 <iframe> 內嵌標籤
+                if (currentVideoUrl.includes("drive.google.com") || currentVideoUrl.includes("preview")) {
+                    mediaTag = `<iframe src="${currentVideoUrl}?autoplay=1&mute=1" class="w-full h-full border-0 rounded-xl" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                } else {
+                    mediaTag = `<video src="${currentVideoUrl}" controls autoplay loop muted class="w-full h-full object-cover rounded-xl"></video>`;
+                }
+
                 container.innerHTML = `
-                    <div class="relative bg-black rounded-2xl overflow-hidden aspect-video flex items-center justify-center border-4 border-gray-800 shadow-inner">
-                        <div class="absolute top-4 left-4 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-bold tracking-wider animate-pulse">● LIVE STREAMING</div>
-                        <div class="text-center text-gray-600"><i class="fa-solid fa-circle-dot text-4xl mb-2 animate-ping text-red-500"></i><p class="text-xs font-mono">RTSP FEED: PEN_${deer.pen_id}_YOLO_POSE</p></div>
+                    <div class="relative bg-black rounded-2xl overflow-hidden aspect-video border-4 border-gray-800 shadow-2xl w-full">
+                        <div class="absolute top-4 left-4 bg-red-600 text-white text-[10px] px-2 py-0.5 rounded font-bold tracking-wider z-10 animate-pulse flex items-center shadow-md">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full mr-1.5 animate-ping"></span>
+                            ● AI RTSP LIVE FEED
+                        </div>
+                        <div class="absolute top-4 right-4 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded font-mono z-10 border border-white/10">
+                            TARGET_ID: <span class="text-yellow-400 font-bold">${activeDeerId}</span>
+                        </div>
+                        <div class="w-full h-full">
+                            ${mediaTag}
+                        </div>
                     </div>`;
             }
         }
