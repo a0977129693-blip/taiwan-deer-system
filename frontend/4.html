@@ -24,10 +24,10 @@
             </div>
 
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
-                <a href="#" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
-                <a href="#" class="nav-link flex items-center">鹿舍總覽</a>
-                <a href="#" class="nav-link flex items-center">鹿隻履歷登記</a>
-                <a href="#" class="nav-active flex items-center">發情記錄管理</a>
+                <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
+                <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
+                <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
+                <a href="4.html" class="nav-active flex items-center">發情記錄管理</a>
             </nav>
 
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6 text-right">
@@ -98,19 +98,10 @@
                         <p class="text-sm font-bold text-gray-800">鹿隻編號: 0x8177</p>
                         <p class="text-xs text-gray-500 mt-1">偵測到雄性追隨特徵，行為持續時長 4 秒。</p>
                     </div>
-
-                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-bold text-blue-600 uppercase">雄性追隨 (FO)</span>
-                            <span class="text-[10px] text-gray-400">14:20:05</span>
-                        </div>
-                        <p class="text-sm font-bold text-gray-800">鹿隻編號: 0x8183</p>
-                        <p class="text-xs text-gray-500 mt-1">偵測到雄性追隨特徵，行為持續時長 3 秒。</p>
-                    </div>
                 </div>
                 
                 <button class="w-full mt-6 py-4 bg-[#8B6B4D] text-white rounded-xl text-sm font-bold shadow-lg hover:bg-[#72563D] transition">
-                    產出行為分析報表
+                    產出行為 analysis 報表
                 </button>
             </div>
         </div>
@@ -124,7 +115,6 @@
     const API_BASE = "https://deer-backend-api.onrender.com/api";
     const activityChart = echarts.init(document.getElementById('activityChart'));
 
-    // 初始化 ECharts 波形
     activityChart.setOption({
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: ['02/11', '02/12', '02/13', '02/14', '02/15', '02/16', '02/17'] },
@@ -134,7 +124,6 @@
 
     async function loadEstrusPageData() {
         try {
-            // 1. 載入四大看板卡片次數
             const resStats = await fetch(`${API_BASE}/estrus/stats`);
             const stats = await resStats.json();
             
@@ -142,7 +131,6 @@
             document.querySelectorAll('.text-3xl.font-black')[1].innerHTML = `${stats.standing_count} <span class="text-xs font-normal">次</span>`;
             document.querySelectorAll('.text-3xl.font-black')[2].innerHTML = `${stats.fo_count} <span class="text-xs font-normal">次</span>`;
 
-            // 2. 載入右側 YOLO 即時流水帳紀錄
             const resLogs = await fetch(`${API_BASE}/estrus/logs`);
             const logs = await resLogs.json();
             const logContainer = document.querySelector('.space-y-4.h-\\[350px\\]');
@@ -166,7 +154,6 @@
         }
     }
 
-    // 點擊「產出行為分析報表」按鈕觸發 AI Agent
     document.querySelector('button.w-full.mt-6').onclick = async () => {
         const selectedDeer = document.querySelector('select').value;
         const btn = document.querySelector('button.w-full.mt-6');
@@ -177,8 +164,6 @@
         try {
             const res = await fetch(`${API_BASE}/ai/analyze/${selectedDeer}`, { method: 'POST' });
             const data = await res.json();
-            
-            // 彈出精緻的高級報告視窗顯示 AI 分析成果
             alert(`🤖 【應用電腦視覺 - 智能分析完成】\n\n${data.report}`);
         } catch (err) {
             alert("AI Agent 調度失敗，請確認後端網路狀態。");

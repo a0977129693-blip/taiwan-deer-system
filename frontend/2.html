@@ -23,12 +23,14 @@
             <div class="flex items-center space-x-4">
                 <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
             </div>
+            
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
-                <a href="#" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
-                <a href="#" class="nav-active flex items-center">鹿舍總覽</a>
-                <a href="#" class="nav-link flex items-center">鹿隻履歷登記</a>
-                <a href="#" class="nav-link flex items-center">發情記錄管理</a>
+                <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
+                <a href="2.html" class="nav-active flex items-center">鹿舍總覽</a>
+                <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
+                <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
+            
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
                 <div class="text-right">
                     <p class="text-[10px] opacity-60">jush123 已登入</p>
@@ -101,16 +103,6 @@
                                 <td class="py-4 px-4 text-gray-400">2026-02-10</td>
                                 <td class="py-4 px-4 font-bold">85 kg</td>
                             </tr>
-                            <tr class="border-b hover:bg-gray-50 transition">
-                                <td class="py-4 px-4 font-mono">鹿隻編號: 0x8207</td>
-                                <td class="py-4 px-4 text-gray-400">2026-01-15</td>
-                                <td class="py-4 px-4 font-bold">82.5 kg</td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50 transition">
-                                <td class="py-4 px-4 font-mono">鹿隻編號: 0x8206</td>
-                                <td class="py-4 px-4 text-gray-400">2025-12-20</td>
-                                <td class="py-4 px-4 font-bold">79 kg</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -121,6 +113,7 @@
     <footer class="py-10 text-center text-gray-400 text-[10px] tracking-[0.3em] uppercase">
         © 2026 應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統
     </footer>
+
 <script>
     const API_BASE = "https://deer-backend-api.onrender.com/api";
     let allDeerData = [];
@@ -161,7 +154,6 @@
         const deer = allDeerData.find(d => d.deer_id === deerId);
         if(!deer) return;
 
-        // 更新大分頁按鈕文字
         document.querySelector('.px-8.py-4.text-blue-600').innerText = `${deer.gender === '公鹿'?'公鹿':'母鹿'}(${deer.deer_id}) 資料`;
 
         const tbody = document.querySelector('tbody');

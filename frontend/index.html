@@ -26,10 +26,10 @@
             </div>
 
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
-                <a href="#" class="nav-active flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
-                <a href="#" class="nav-link flex items-center">鹿舍總覽</a>
-                <a href="#" class="nav-link flex items-center">鹿隻履歷登記</a>
-                <a href="#" class="nav-link flex items-center">發情記錄管理</a>
+                <a href="index.html" class="nav-active flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
+                <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
+                <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
+                <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
 
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
@@ -82,7 +82,6 @@
     </footer>
 
     <script>
-    // 定義後端網址（本地測試用 localhost，後續上線換成 Render 網址）
     const API_BASE = "https://deer-backend-api.onrender.com/api";
 
     const getGaugeOption = (value, min, max, mainColor) => ({
@@ -108,25 +107,20 @@
         }]
     });
 
-    // 初始化 ECharts 圖表
     const tempGauge = echarts.init(document.getElementById('tempGauge'));
     const humGauge = echarts.init(document.getElementById('humGauge'));
     const trendChart = echarts.init(document.getElementById('trendChart'));
 
-    // 從後端非同步同步資料
     async function loadDashboardData() {
         try {
-            // 1. 讀取即時環境
             const resCurrent = await fetch(`${API_BASE}/environment/current`);
             const currentData = await resCurrent.json();
             
-            // 更新儀表板數據與指針
             document.querySelector('.text-5xl.font-black.text-blue-500').innerHTML = `${currentData.temperature}<span class="text-xl ml-1 text-gray-300">°C</span>`;
             document.querySelector('.text-5xl.font-black.text-cyan-500').innerHTML = `${currentData.humidity}<span class="text-xl ml-1 text-gray-300">%RH</span>`;
             tempGauge.setOption(getGaugeOption(currentData.temperature, 0, 50, '#3b82f6'));
             humGauge.setOption(getGaugeOption(currentData.humidity, 0, 100, '#06b6d4'));
 
-            // 2. 讀取歷史波形
             const resHistory = await fetch(`${API_BASE}/environment/history`);
             const historyData = await resHistory.json();
             
