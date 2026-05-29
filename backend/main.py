@@ -2,13 +2,18 @@ import os
 import datetime
 import random
 import requests
+import logging
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, String, Float, Integer, Date, DateTime, desc, func
+from sqlalchemy import create_engine, Column, String, Float, Integer, Date, DateTime, desc, func, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
+
+# ── 啟動診斷日誌 ──────────────────────────────────────────────
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="臺灣鹿發情監測與繁殖管理系統 - 線上生產正式版 API")
 
@@ -21,14 +26,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 資料庫連線配置 (自動相容 Supabase PostgreSQL)
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-else:
-    DATABASE_URL = "sqlite:///./taiwan_deer.db"
+# ── 資料庫連線配置 ────────────────────────────────────────────
+# 修復：正確處理 Supabase / Render 的 DATABASE_URL 環境變數
+_raw_url = os.getenv("DATABASE_URL", "")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {})
+if not _raw_url:
+    logger.warning("⚠️  DATABASE_URL 環境變數未設定！將使用本地 SQLite，無法讀取 Supabase 資料。")
+    DATABASE_URL = "sqlite:///./taiwan_deer.db"
+elif _raw_url.startswith("postgres://"):
+    # Heroku / Supabase 舊格式相容修正
+    DATABASE_URL = _raw_url.replace("postgres://", "postgresql://", 1)
+    logger.info("✅  已連接 PostgreSQL (Supabase)")
+else:
+    DATABASE_URL = _raw_url
+    logger.info("✅  已連接資料庫")
+
+# PostgreSQL 需要連線池設定防止 Supabase 閒置斷線
+if "sqlite" in DATABASE_URL:
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+else:
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,       # 每次使用前先 ping，防止 Supabase 閒置斷線
+        pool_recycle=300,         # 每 5 分鐘回收連線
+        pool_size=5,
+        max_overflow=10,
+    )
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -70,6 +94,21 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# ── 健康檢查端點（部署後第一步就訪問這個確認連線）───────────────
+@app.get("/api/health")
+def health_check(db: Session = Depends(get_db)):
+    try:
+        db.execute(text("SELECT 1"))
+        deer_count = db.query(DeerProfileModel).count() if "deer_profiles" in engine.dialect.get_table_names(db.bind) else "（資料表尚未建立）"
+        return {
+            "status": "ok",
+            "database": "postgresql" if "postgresql" in DATABASE_URL else "sqlite（⚠️ 未連到 Supabase）",
+            "deer_count": deer_count,
+            "time": datetime.datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
 
 class DeerProfileCreate(BaseModel):
     deer_id: str
