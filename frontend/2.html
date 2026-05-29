@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 鹿舍總攬</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f2efea; }
+        .sidebar-bg { background-color: #8B6B4D; }
+        .nav-link:hover { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; transition: all 0.2s; }
+        .nav-active { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; }
+        .deer-btn { transition: all 0.2s; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .deer-btn:hover { background-color: #2563eb; color: white; transform: translateY(-1px); }
+        .deer-btn-active { background-color: #3b82f6; color: white; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); }
+    </style>
+</head>
+<body class="font-sans text-gray-700">
+
+    <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
+        <div class="px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
+            </div>
+            <nav class="hidden xl:flex space-x-8 text-sm font-medium">
+                <a href="#" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
+                <a href="#" class="nav-active flex items-center">鹿舍總覽</a>
+                <a href="#" class="nav-link flex items-center">鹿隻履歷登記</a>
+                <a href="#" class="nav-link flex items-center">發情記錄管理</a>
+            </nav>
+            <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
+                <div class="text-right">
+                    <p class="text-[10px] opacity-60">jush123 已登入</p>
+                    <p class="text-sm font-bold uppercase">李仲琨</p>
+                </div>
+                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-user text-[#8B6B4D]"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-8 flex space-x-8">
+        
+        <div class="w-64 flex-shrink-0">
+            <div class="bg-white/50 p-4 rounded-2xl border border-gray-200 shadow-sm">
+                <h3 class="text-center font-bold text-gray-500 mb-3 border-b pb-2">公鹿區域</h3>
+                <div class="grid grid-cols-1 gap-2 mb-6">
+                    <button class="deer-btn-active deer-btn py-2 rounded-lg text-sm text-center">公鹿 1</button>
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 2</button>
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 3</button>
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 4</button>
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">公鹿 5</button>
+                </div>
+
+                <h3 class="text-center font-bold text-gray-500 mb-3 border-b pb-2">母鹿區域</h3>
+                <div class="grid grid-cols-1 gap-2 mb-6">
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">母鹿 1</button>
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">母鹿 2</button>
+                </div>
+
+                <h3 class="text-center font-bold text-gray-500 mb-3 border-b pb-2">特別區域</h3>
+                <div class="grid grid-cols-1 gap-2">
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">種鹿 1</button>
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">小鹿 1</button>
+                    <button class="bg-white deer-btn py-2 rounded-lg text-sm text-center">小鹿 2</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="flex border-b">
+                    <button class="px-8 py-4 text-blue-600 border-b-2 border-blue-600 font-bold text-sm">公鹿1鹿隻資料</button>
+                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1發情資料</button>
+                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1活動量資料</button>
+                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1配種資料</button>
+                    <button class="px-8 py-4 text-gray-400 hover:text-gray-600 font-medium text-sm">公鹿1即時監控介面</button>
+                </div>
+
+                <div class="p-6">
+                    <div class="flex justify-end mb-4">
+                        <div class="relative w-64">
+                            <input type="text" placeholder="搜尋關鍵字" class="w-full pl-4 pr-10 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-300"></i>
+                        </div>
+                    </div>
+
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="text-gray-400 border-b">
+                                <th class="pb-4 font-semibold px-4">公鹿1資料</th>
+                                <th class="pb-4 font-semibold px-4">紀錄日期</th>
+                                <th class="pb-4 font-semibold px-4">量測數據</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600">
+                            <tr class="border-b hover:bg-gray-50 transition">
+                                <td class="py-4 px-4 font-mono">鹿隻編號: 0x8210</td>
+                                <td class="py-4 px-4 text-gray-400">2026-02-10</td>
+                                <td class="py-4 px-4 font-bold">85 kg</td>
+                            </tr>
+                            <tr class="border-b hover:bg-gray-50 transition">
+                                <td class="py-4 px-4 font-mono">鹿隻編號: 0x8207</td>
+                                <td class="py-4 px-4 text-gray-400">2026-01-15</td>
+                                <td class="py-4 px-4 font-bold">82.5 kg</td>
+                            </tr>
+                            <tr class="border-b hover:bg-gray-50 transition">
+                                <td class="py-4 px-4 font-mono">鹿隻編號: 0x8206</td>
+                                <td class="py-4 px-4 text-gray-400">2025-12-20</td>
+                                <td class="py-4 px-4 font-bold">79 kg</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-10 text-center text-gray-400 text-[10px] tracking-[0.3em] uppercase">
+        © 2026 應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統
+    </footer>
+<script>
+    const API_BASE = "http://127.0.0.1:8000/api";
+    let allDeerData = [];
+
+    async function loadDeerSelection() {
+        try {
+            const res = await fetch(`${API_BASE}/deer`);
+            allDeerData = await res.json();
+            
+            const maleContainer = document.querySelector('.bg-white\\/50 .grid');
+            const femaleContainer = document.querySelectorAll('.bg-white\\/50 .grid')[1];
+            
+            maleContainer.innerHTML = "";
+            femaleContainer.innerHTML = "";
+
+            allDeerData.forEach(deer => {
+                const btn = document.createElement('button');
+                btn.className = "bg-white deer-btn py-2 rounded-lg text-sm text-center";
+                btn.innerText = deer.gender === "公鹿" ? `公鹿 (${deer.deer_id})` : `母鹿 (${deer.deer_id})`;
+                btn.onclick = () => renderDeerTable(deer.deer_id);
+                
+                if(deer.gender === "公鹿") {
+                    maleContainer.appendChild(btn);
+                } else {
+                    femaleContainer.appendChild(btn);
+                }
+            });
+
+            if(allDeerData.length > 0) {
+                renderDeerTable(allDeerData[0].deer_id);
+            }
+        } catch (err) {
+            console.error("載入鹿隻列表失敗", err);
+        }
+    }
+
+    function renderDeerTable(deerId) {
+        const deer = allDeerData.find(d => d.deer_id === deerId);
+        if(!deer) return;
+
+        // 更新大分頁按鈕文字
+        document.querySelector('.px-8.py-4.text-blue-600').innerText = `${deer.gender === '公鹿'?'公鹿':'母鹿'}(${deer.deer_id}) 資料`;
+
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = `
+            <tr class="border-b hover:bg-gray-50 transition">
+                <td class="py-4 px-4 font-mono">鹿隻編號: ${deer.deer_id}</td>
+                <td class="py-4 px-4 text-gray-400">體重指標</td>
+                <td class="py-4 px-4 font-bold">${deer.weight} kg</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50 transition">
+                <td class="py-4 px-4 font-mono">出生日期: ${deer.birthday}</td>
+                <td class="py-4 px-4 text-gray-400">所屬欄位編號</td>
+                <td class="py-4 px-4 font-bold">${deer.pen_id || '未分配'}</td>
+            </tr>
+            <tr class="border-b hover:bg-gray-50 transition">
+                <td class="py-4 px-4 font-mono">累計成功配種次數</td>
+                <td class="py-4 px-4 text-gray-400">遺傳父畜/母畜</td>
+                <td class="py-4 px-4 font-bold">父: ${deer.father_id || '不詳'} / 母: ${deer.mother_id || '不詳'} (共 ${deer.breeding_count} 次)</td>
+            </tr>
+        `;
+    }
+
+    loadDeerSelection();
+</script>
+</body>
+</html>

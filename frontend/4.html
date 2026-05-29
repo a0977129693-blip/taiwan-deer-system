@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 發情記錄管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        body { background-color: #f2efea; }
+        .sidebar-bg { background-color: #8B6B4D; }
+        .nav-link:hover { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; transition: all 0.2s; }
+        .nav-active { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; }
+        .card-shadow { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="font-sans text-gray-700">
+
+    <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
+        <div class="px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-lg font-bold">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
+            </div>
+
+            <nav class="hidden xl:flex space-x-8 text-sm font-medium">
+                <a href="#" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
+                <a href="#" class="nav-link flex items-center">鹿舍總覽</a>
+                <a href="#" class="nav-link flex items-center">鹿隻履歷登記</a>
+                <a href="#" class="nav-active flex items-center">發情記錄管理</a>
+            </nav>
+
+            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 text-right">
+                <div class="text-right">
+                    <p class="text-[10px] opacity-60">jush123 已登入</p>
+                    <p class="text-sm font-bold uppercase">李仲琨</p>
+                </div>
+                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-user text-[#8B6B4D]"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-8">
+        
+        <div class="flex justify-end items-center mb-8 text-sm">
+            <div class="bg-white px-5 py-2 rounded-full shadow-sm text-gray-500 font-medium flex items-center border border-gray-100">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                資料更新日期：2026-02-17
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 text-center">
+            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-red-400">
+                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日爬跨次數</p>
+                <p class="text-3xl font-black text-gray-300">0 <span class="text-xs font-normal">次</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-amber-400">
+                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日站立發情次數</p>
+                <p class="text-3xl font-black text-gray-300">0 <span class="text-xs font-normal">次</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-blue-400">
+                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日雄性追隨次數</p>
+                <p class="text-3xl font-black text-blue-600">2 <span class="text-xs font-normal">次</span></p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-green-500">
+                <p class="text-[11px] text-gray-400 font-bold mb-3 uppercase tracking-wider">今日總活動量</p>
+                <p class="text-3xl font-black text-green-600">8,542 <span class="text-xs font-normal text-gray-400">指標</span></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-white p-8 rounded-2xl card-shadow">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 class="text-xl font-bold text-gray-800">歷史環境活動量</h2>
+                    <div class="flex items-center space-x-3">
+                        <label class="text-xs text-gray-400">選擇鹿隻編號：</label>
+                        <select class="bg-amber-50 border border-amber-200 text-[#8B6B4D] text-sm font-bold rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-amber-200 cursor-pointer">
+                            <option value="0x8210">0x8210 (公鹿)</option>
+                            <option value="0x7273">0x7273 (母鹿)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="activityChart" style="width: 100%; height: 400px;"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl card-shadow border-l-4 border-[#8B6B4D]">
+                <h2 class="text-lg font-bold mb-6 flex items-center">
+                    <i class="fa-solid fa-list-ul mr-3 text-[#8B6B4D]"></i>即時行為紀錄
+                </h2>
+                <div class="space-y-4 h-[350px] overflow-y-auto pr-2">
+                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-blue-600 uppercase">雄性追隨 (FO)</span>
+                            <span class="text-[10px] text-gray-400">16:45:12</span>
+                        </div>
+                        <p class="text-sm font-bold text-gray-800">鹿隻編號: 0x8177</p>
+                        <p class="text-xs text-gray-500 mt-1">偵測到雄性追隨特徵，行為持續時長 4 秒。</p>
+                    </div>
+
+                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-blue-600 uppercase">雄性追隨 (FO)</span>
+                            <span class="text-[10px] text-gray-400">14:20:05</span>
+                        </div>
+                        <p class="text-sm font-bold text-gray-800">鹿隻編號: 0x8183</p>
+                        <p class="text-xs text-gray-500 mt-1">偵測到雄性追隨特徵，行為持續時長 3 秒。</p>
+                    </div>
+                </div>
+                
+                <button class="w-full mt-6 py-4 bg-[#8B6B4D] text-white rounded-xl text-sm font-bold shadow-lg hover:bg-[#72563D] transition">
+                    產出行為分析報表
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-12 text-center text-gray-400 text-[10px] tracking-[0.3em] uppercase">
+        © 2026 應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統
+    </footer>
+
+    <script>
+    const API_BASE = "http://127.0.0.1:8000/api";
+    const activityChart = echarts.init(document.getElementById('activityChart'));
+
+    // 初始化 ECharts 波形
+    activityChart.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: ['02/11', '02/12', '02/13', '02/14', '02/15', '02/16', '02/17'] },
+        yAxis: { type: 'value', min: 0, max: 300 },
+        series: [{ name: '每日總活動量', type: 'line', data: [112, 108, 125, 118, 121, 115, 110], smooth: true, lineStyle: { color: '#10b981' } }]
+    });
+
+    async function loadEstrusPageData() {
+        try {
+            // 1. 載入四大看板卡片次數
+            const resStats = await fetch(`${API_BASE}/estrus/stats`);
+            const stats = await resStats.json();
+            
+            document.querySelectorAll('.text-3xl.font-black')[0].innerHTML = `${stats.mounting_count} <span class="text-xs font-normal">次</span>`;
+            document.querySelectorAll('.text-3xl.font-black')[1].innerHTML = `${stats.standing_count} <span class="text-xs font-normal">次</span>`;
+            document.querySelectorAll('.text-3xl.font-black')[2].innerHTML = `${stats.fo_count} <span class="text-xs font-normal">次</span>`;
+
+            // 2. 載入右側 YOLO 即時流水帳紀錄
+            const resLogs = await fetch(`${API_BASE}/estrus/logs`);
+            const logs = await resLogs.json();
+            const logContainer = document.querySelector('.space-y-4.h-\\[350px\\]');
+            logContainer.innerHTML = "";
+
+            logs.forEach(log => {
+                const item = document.createElement('div');
+                item.className = "p-4 bg-blue-50 rounded-xl border border-blue-100 mb-2";
+                item.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-bold text-blue-600 uppercase">${log.behavior_type === 'FO'?'雄性追隨 (FO)': log.behavior_type}</span>
+                        <span class="text-[10px] text-gray-400">${log.time}</span>
+                    </div>
+                    <p class="text-sm font-bold text-gray-800">鹿隻編號: ${log.deer_id}</p>
+                    <p class="text-xs text-gray-500 mt-1">智慧視覺辨識特徵，持續時長 ${log.duration} 秒。</p>
+                `;
+                logContainer.appendChild(item);
+            });
+        } catch (err) {
+            console.error("發情模組串接錯誤", err);
+        }
+    }
+
+    // 點擊「產出行為分析報表」按鈕觸發 AI Agent
+    document.querySelector('button.w-full.mt-6').onclick = async () => {
+        const selectedDeer = document.querySelector('select').value;
+        const btn = document.querySelector('button.w-full.mt-6');
+        
+        btn.innerText = "AI 正在分析特徵軌跡中...";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${API_BASE}/ai/analyze/${selectedDeer}`, { method: 'POST' });
+            const data = await res.json();
+            
+            // 彈出精緻的高級報告視窗顯示 AI 分析成果
+            alert(`🤖 【應用電腦視覺 - 智能分析完成】\n\n${data.report}`);
+        } catch (err) {
+            alert("AI Agent 調度失敗，請確認後端網路狀態。");
+        } finally {
+            btn.innerText = "產出行為分析報表";
+            btn.disabled = false;
+        }
+    };
+
+    loadEstrusPageData();
+</script>
+</body>
+</html>
