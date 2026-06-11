@@ -18,52 +18,58 @@
 <body class="font-sans text-gray-700">
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
-        <div class="px-6 h-20 flex items-center justify-between">
-            <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
+        <div class="px-4 md:px-6 h-20 flex items-center justify-between">
+            <h1 class="text-base md:text-lg font-bold leading-tight">臺灣鹿發情監測與繁殖管理系統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-active flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
                 <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-            <div class="flex items-center space-x-4 border-l border-white/20 pl-6">
+            <div class="flex items-center space-x-3 border-l border-white/20 pl-4 md:pl-6">
                 <div class="text-right">
-                    <p class="text-[10px] opacity-60">jush123 已登入</p>
-                    <p class="text-sm font-bold uppercase">李仲琨</p>
+                    <p class="text-[9px] opacity-60">jush123 已登入</p>
+                    <p class="text-xs md:text-sm font-bold uppercase">李仲琨</p>
                 </div>
-                <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center cursor-pointer shadow-inner">
-                    <i class="fa-solid fa-user text-[#8B6B4D]"></i>
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-amber-100 rounded-full flex items-center justify-center cursor-pointer shadow-inner">
+                    <i class="fa-solid fa-user text-[#8B6B4D] text-xs md:text-base"></i>
                 </div>
             </div>
+        </div>
+        <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
+            <a href="index.html" class="text-shadow-sm text-shadow-sm border-b-2 border-[#fcd34d] pb-0.5 px-2 text-[#fcd34d]">環境數據</a>
+            <a href="2.html" class="opacity-80 px-2 text-white">鹿舍總覽</a>
+            <a href="3.html" class="opacity-80 px-2 text-white">履歷登記</a>
+            <a href="4.html" class="opacity-80 px-2 text-white">發情管理</a>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-8">
-        <div class="flex justify-end items-center mb-8 text-sm">
-            <div class="bg-white px-5 py-2 rounded-full shadow-sm text-gray-500 font-medium flex items-center border border-gray-100">
+    <main class="max-w-7xl mx-auto p-4 md:p-8">
+        <div class="flex justify-end items-center mb-6 text-xs">
+            <div class="bg-white px-4 py-2 rounded-full shadow-sm text-gray-500 font-medium flex items-center border border-gray-100">
                 <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                物聯網數據流：實時監測模擬中
+                物聯網數據流：實時監測中
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-            <div class="bg-white p-8 rounded-2xl card-shadow flex flex-col items-center border-t-4 border-blue-400">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-10">
+            <div class="bg-white p-4 md:p-8 rounded-2xl card-shadow flex flex-col items-center border-t-4 border-blue-400">
                 <h3 class="font-bold text-gray-400 text-xs uppercase tracking-widest mb-4">環境溫度 °C</h3>
-                <div id="tempGauge" style="width: 320px; height: 240px;"></div>
-                <div id="tempVal" class="text-5xl font-black text-blue-500 mt-[-30px]">19.5<span class="text-xl ml-1 text-gray-300">°C</span></div>
+                <div id="tempGauge" class="w-full max-w-[320px]" style="height: 220px;"></div>
+                <div id="tempVal" class="text-4xl md:text-5xl font-black text-blue-500 mt-[-20px] md:mt-[-30px]">19.5<span class="text-xl ml-1 text-gray-300">°C</span></div>
             </div>
-            <div class="bg-white p-8 rounded-2xl card-shadow flex flex-col items-center border-t-4 border-cyan-400">
+            <div class="bg-white p-4 md:p-8 rounded-2xl card-shadow flex flex-col items-center border-t-4 border-cyan-400">
                 <h3 class="font-bold text-gray-400 text-xs uppercase tracking-widest mb-4">環境濕度 %RH</h3>
-                <div id="humGauge" style="width: 320px; height: 240px;"></div>
-                <div id="humVal" class="text-5xl font-black text-cyan-500 mt-[-30px]">62.8<span class="text-xl ml-1 text-gray-300">%RH</span></div>
+                <div id="humGauge" class="w-full max-w-[320px]" style="height: 220px;"></div>
+                <div id="humVal" class="text-4xl md:text-5xl font-black text-cyan-500 mt-[-20px] md:mt-[-30px]">62.8<span class="text-xl ml-1 text-gray-300">%RH</span></div>
             </div>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl card-shadow">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-xl font-bold text-gray-800 flex items-center"><i class="fa-solid fa-temperature-list mr-3 text-[#8B6B4D]"></i>歷史環境溫度紀錄波形</h2>
+        <div class="bg-white p-4 md:p-8 rounded-2xl card-shadow overflow-hidden">
+            <div class="flex justify-between items-center mb-6 md:mb-10">
+                <h2 class="text-base md:text-xl font-bold text-gray-800 flex items-center"><i class="fa-solid fa-temperature-list mr-2 md:mr-3 text-[#8B6B4D]"></i>歷史環境溫度紀錄波形</h2>
             </div>
-            <div id="trendChart" style="width: 100%; height: 380px;"></div>
+            <div id="trendChart" class="w-full" style="height: 280px; md:height: 380px;"></div>
         </div>
     </main>
 
@@ -73,10 +79,10 @@
         const getGaugeOption = (value, min, max, mainColor) => ({
             series: [{
                 type: 'gauge', startAngle: 200, endAngle: -20, min: min, max: max, splitNumber: 5,
-                axisLine: { lineStyle: { width: 10, color: [[0.3, '#67c23a'], [0.7, mainColor], [1, '#f56c6c']] } },
-                pointer: { icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z', length: '60%', width: 6, offsetCenter: [0, '5%'], itemStyle: { color: mainColor } },
-                axisTick: { show: true, distance: -20, length: 5 }, splitLine: { show: true, distance: -25, length: 10 },
-                axisLabel: { show: true, distance: -12, color: '#bbb', fontSize: 10 }, detail: { show: false }, data: [{ value: value }]
+                axisLine: { lineStyle: { width: 8, color: [[0.3, '#67c23a'], [0.7, mainColor], [1, '#f56c6c']] } },
+                pointer: { icon: 'path://M12.8,0.7l12,40.1H0.7L12.8,0.7z', length: '60%', width: 5, offsetCenter: [0, '5%'], itemStyle: { color: mainColor } },
+                axisTick: { show: true, distance: -18, length: 4 }, splitLine: { show: true, distance: -22, length: 8 },
+                axisLabel: { show: true, distance: -10, color: '#bbb', fontSize: 9 }, detail: { show: false }, data: [{ value: value }]
             }]
         });
 
@@ -101,7 +107,7 @@
                 const data = await res.json();
                 trendChart.setOption({
                     tooltip: { trigger: 'axis' },
-                    grid: { left: '3%', right: '4%', bottom: '5%', containLabel: true },
+                    grid: { left: '4%', right: '4%', bottom: '8%', containLabel: true },
                     xAxis: { type: 'category', boundaryGap: false, data: data.times, axisLine: { lineStyle: { color: '#eee' } } },
                     yAxis: { type: 'value', min: 15, max: 35, axisLabel: { formatter: '{value} °C' } },
                     series: [{ name: '環境溫度', type: 'line', data: data.temperatures, smooth: true, lineStyle: { width: 3, color: '#3b82f6' }, itemStyle: { color: '#3b82f6' } }]
@@ -111,7 +117,7 @@
 
         refreshDashboard();
         loadHistory();
-        setInterval(refreshDashboard, 3000); // 每 3 秒動態浮動更新
+        setInterval(refreshDashboard, 3000);
         window.onresize = function() { tempGauge.resize(); humGauge.resize(); trendChart.resize(); };
     </script>
 </body>
