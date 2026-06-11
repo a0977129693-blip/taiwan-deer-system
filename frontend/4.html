@@ -16,8 +16,8 @@
 <body class="font-sans text-gray-700">
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
-        <div class="px-6 h-20 flex items-center justify-between">
-            <h1 class="text-lg font-bold">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
+        <div class="px-4 md:px-6 h-20 flex items-center justify-between">
+            <h1 class="text-base md:text-lg font-bold">臺灣鹿發情監測與繁殖管理系統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
@@ -26,57 +26,63 @@
             </nav>
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6 text-right"><span class="text-sm font-bold uppercase">李仲琨</span></div>
         </div>
+        <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
+            <a href="index.html" class="opacity-80 px-2 text-white">環境數據</a>
+            <a href="2.html" class="opacity-80 px-2 text-white">鹿舍總覽</a>
+            <a href="3.html" class="opacity-80 px-2 text-white">履歷登記</a>
+            <a href="4.html" class="text-shadow-sm border-b-2 border-[#fcd34d] pb-0.5 px-2 text-[#fcd34d]">發情管理</a>
+        </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 text-center">
-            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-red-400">
-                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">今日爬跨累計 (Mounting)</p>
-                <p id="stat-m" class="text-3xl font-black text-red-500">0 次</p>
+    <main class="max-w-7xl mx-auto p-4 md:p-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-10 text-center">
+            <div class="bg-white p-3 md:p-6 rounded-2xl card-shadow border-b-4 border-red-400">
+                <p class="text-[9px] md:text-[11px] text-gray-400 font-bold mb-1 md:mb-2 uppercase tracking-wider">今日爬跨 (Mounting)</p>
+                <p id="stat-m" class="text-xl md:text-3xl font-black text-red-500">0 次</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-amber-400">
-                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">今日站立發情累計 (Standing)</p>
-                <p id="stat-s" class="text-3xl font-black text-amber-500">0 次</p>
+            <div class="bg-white p-3 md:p-6 rounded-2xl card-shadow border-b-4 border-amber-400">
+                <p class="text-[9px] md:text-[11px] text-gray-400 font-bold mb-1 md:mb-2 uppercase tracking-wider">站立發情 (Standing)</p>
+                <p id="stat-s" class="text-xl md:text-3xl font-black text-amber-500">0 次</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-blue-400">
-                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">今日雄性追隨累計 (FO)</p>
-                <p id="stat-f" class="text-3xl font-black text-blue-500">0 次</p>
+            <div class="bg-white p-3 md:p-6 rounded-2xl card-shadow border-b-4 border-blue-400">
+                <p class="text-[9px] md:text-[11px] text-gray-400 font-bold mb-1 md:mb-2 uppercase tracking-wider">雄性追隨 (FO)</p>
+                <p id="stat-f" class="text-xl md:text-3xl font-black text-blue-500">0 次</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl card-shadow border-b-4 border-green-500">
-                <p class="text-[11px] text-gray-400 font-bold mb-2 uppercase tracking-wider">全場即時綜合活動量</p>
-                <p id="stat-idx" class="text-3xl font-black text-green-600">8,542</p>
+            <div class="bg-white p-3 md:p-6 rounded-2xl card-shadow border-b-4 border-green-500">
+                <p class="text-[9px] md:text-[11px] text-gray-400 font-bold mb-1 md:mb-2 uppercase tracking-wider">即時綜合活動量</p>
+                <p id="stat-idx" class="text-xl md:text-3xl font-black text-green-600">8,542</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 bg-white p-8 rounded-2xl card-shadow">
-                <div class="flex justify-between items-center mb-10">
-                    <h2 class="text-xl font-bold text-gray-800">活動量波動趨勢圖</h2>
-                    <div class="flex items-center space-x-2">
-                        <label class="text-xs text-gray-400">分析茸鹿對象：</label>
-                        <select id="deerFilter" class="bg-amber-50 border border-amber-200 text-[#8B6B4D] text-sm font-bold rounded-lg px-3 py-1.5 outline-none cursor-pointer"></select>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div class="lg:col-span-2 bg-white p-4 md:p-8 rounded-2xl card-shadow">
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 sm:gap-0 mb-6 md:mb-10">
+                    <h2 class="text-base md:text-xl font-bold text-gray-800">活動量波動趨勢圖</h2>
+                    <div class="flex items-center space-x-2 text-xs md:text-sm">
+                        <label class="text-gray-400 whitespace-nowrap">對象：</label>
+                        <select id="deerFilter" class="bg-amber-50 border border-amber-200 text-[#8B6B4D] font-bold rounded-lg px-2.5 py-1.5 outline-none cursor-pointer w-full sm:w-auto"></select>
                     </div>
                 </div>
-                <div id="activityChart" style="width: 100%; height: 400px;"></div>
+                <div id="activityChart" class="w-full" style="height: 280px; md:height: 400px;"></div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl card-shadow border-l-4 border-[#8B6B4D] flex flex-col justify-between">
+            <div class="bg-white p-4 md:p-6 rounded-2xl card-shadow border-l-4 border-[#8B6B4D] flex flex-col justify-between">
                 <div>
-                    <h2 class="text-lg font-bold mb-4 flex items-center"><i class="fa-solid fa-list-ul mr-3 text-[#8B6B4D]"></i>YOLO 實時電腦視覺監測流</h2>
-                    <div class="space-y-3 h-[340px] overflow-y-auto pr-1 font-sans" id="liveLogStream"></div>
+                    <h2 class="text-base md:text-lg font-bold mb-4 flex items-center"><i class="fa-solid fa-list-ul mr-2 md:mr-3 text-[#8B6B4D]"></i>YOLO 電腦視覺監測流</h2>
+                    <div class="space-y-3 h-[260px] md:h-[340px] overflow-y-auto pr-1 font-sans" id="liveLogStream"></div>
                 </div>
-                <button id="agentBtn" class="w-full mt-4 py-4 bg-[#8B6B4D] text-white rounded-xl text-sm font-bold shadow-lg hover:bg-[#72563D] transition">調度 AI Agent 產出行為專家報告</button>
+                <button id="agentBtn" class="w-full mt-4 py-3 md:py-4 bg-[#8B6B4D] text-white rounded-xl text-xs md:text-sm font-bold shadow-lg hover:bg-[#72563D] transition">調度 AI Agent 產出行為專家報告</button>
             </div>
         </div>
     </main>
 
-    <div id="agentModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg p-8 rounded-3xl shadow-2xl border-t-8 border-[#8B6B4D] mx-4 animate-fadeIn">
-            <div class="flex items-center space-x-3 mb-4 text-[#8B6B4D] text-xl font-black">
-                <i class="fa-solid fa-robot text-2xl animate-bounce"></i><h3>電腦視覺 ＆ AI 專家智能診斷</h3>
+    <div id="agentModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-lg p-5 md:p-8 rounded-3xl shadow-2xl border-t-8 border-[#8B6B4D] animate-fadeIn">
+            <div class="flex items-center space-x-2.5 mb-4 text-[#8B6B4D] text-base md:text-xl font-black">
+                <i class="fa-solid fa-robot text-xl md:text-2xl animate-bounce"></i><h3>AI 專家智能診斷</h3>
             </div>
-            <div id="agentText" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-5 rounded-2xl border border-gray-100 max-h-64 overflow-y-auto font-medium"></div>
-            <button onclick="document.getElementById('agentModal').classList.add('hidden')" class="w-full mt-6 py-3 bg-gray-800 text-white font-bold rounded-xl text-sm hover:bg-gray-900 transition">關閉報告並返回主控台</button>
+            <div id="agentText" class="text-xs md:text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-4 md:p-5 rounded-2xl border border-gray-100 max-h-60 overflow-y-auto font-medium"></div>
+            <button onclick="document.getElementById('agentModal').classList.add('hidden')" class="w-full mt-5 py-3 bg-gray-800 text-white font-bold rounded-xl text-xs md:text-sm hover:bg-gray-900 transition">關閉報告並返回</button>
         </div>
     </div>
 
@@ -86,6 +92,7 @@
 
         activityChart.setOption({
             tooltip: { trigger: 'axis' },
+            grid: { left: '3%', right: '4%', bottom: '5%', containLabel: true },
             xAxis: { type: 'category', data: ['02/11', '02/12', '02/13', '02/14', '02/15', '02/16', '02/17'] },
             yAxis: { type: 'value', min: 0, max: 300 },
             series: [{ name: '個別活動指數', type: 'line', data: [112, 108, 125, 118, 121, 115, 110], smooth: true, lineStyle: { color: '#10b981', width: 3 } }]
@@ -93,7 +100,6 @@
 
         async function pollRealtimeMetrics() {
             try {
-                // 🛠️ 已修復：更名為 resEstrusStats 並移除了多餘的 await assignment 筆誤
                 const resEstrusStats = await fetch(`${API_BASE}/estrus/stats`);
                 const stats = await resEstrusStats.json();
                 
@@ -102,19 +108,18 @@
                 document.getElementById('stat-f').innerText = `${stats.fo_count} 次`;
                 document.getElementById('stat-idx').innerText = stats.total_activity_index.toLocaleString();
 
-                // 🛠️ 已更名為 resEstrusLogs 避免與其他頁面衝突
                 const resEstrusLogs = await fetch(`${API_BASE}/estrus/logs`);
                 const logs = await resEstrusLogs.json();
                 const logBox = document.getElementById('liveLogStream');
                 
                 logBox.innerHTML = logs.map(l => `
-                    <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100/40 text-xs">
+                    <div class="p-2.5 bg-blue-50/60 rounded-xl border border-blue-100/40 text-[11px] md:text-xs">
                         <div class="flex justify-between font-bold text-blue-600 mb-1">
-                            <span>${l.behavior_type=='Mounting'?'爬跨/騎乘(Mounting)':l.behavior_type=='Standing'?'站立發情(Standing)':l.behavior_type=='FO'?'雄性追隨(FO)':l.behavior_type}</span>
+                            <span>${l.behavior_type=='Mounting'?'爬跨(Mounting)':l.behavior_type=='Standing'?'站立(Standing)':l.behavior_type=='FO'?'追隨(FO)':l.behavior_type}</span>
                             <span class="text-gray-400 font-mono">${l.time}</span>
                         </div>
-                        <p class="text-gray-700 font-semibold">目標茸鹿耳標: ${l.deer_id}</p>
-                        <p class="text-gray-400 text-[11px]">特徵辨識持續時間: ${l.duration} 秒</p>
+                        <p class="text-gray-700 font-semibold">耳標號: ${l.deer_id}</p>
+                        <p class="text-gray-400 text-[10px]">持續時間: ${l.duration} 秒</p>
                     </div>`).join('');
             } catch (e) { console.error("輪詢資料失敗:", e); }
         }
@@ -137,7 +142,7 @@
             const deerId = document.getElementById('deerFilter').value;
             if(!deerId) return;
             const btn = document.getElementById('agentBtn');
-            btn.innerText = "正在調度 AI Agent 分析行為特徵..."; btn.disabled = true;
+            btn.innerText = "正在分析行為特徵..."; btn.disabled = true;
 
             try {
                 const res = await fetch(`${API_BASE}/ai/analyze/${deerId}`, { method: 'POST' });
@@ -150,7 +155,8 @@
 
         bindDeerFilter();
         pollRealtimeMetrics();
-        setInterval(pollRealtimeMetrics, 4000); // 每 4 秒自動同步更新
+        setInterval(pollRealtimeMetrics, 4000);
+        window.addEventListener('resize', () => { activityChart.resize(); });
     </script>
 </body>
 </html>
