@@ -20,8 +20,8 @@
 <body class="font-sans text-gray-700">
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
-        <div class="px-6 h-20 flex items-center justify-between">
-            <h1 class="text-lg font-bold leading-tight">應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</h1>
+        <div class="px-4 md:px-6 h-20 flex items-center justify-between">
+            <h1 class="text-base md:text-lg font-bold leading-tight">臺灣鹿發情監測與繁殖管理系統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
@@ -30,25 +30,31 @@
             </nav>
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6"><span class="text-sm font-bold uppercase">李仲琨</span></div>
         </div>
+        <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
+            <a href="index.html" class="opacity-80 px-2 text-white">環境數據</a>
+            <a href="2.html" class="opacity-80 px-2 text-white">鹿舍總覽</a>
+            <a href="3.html" class="text-shadow-sm border-b-2 border-[#fcd34d] pb-0.5 px-2 text-[#fcd34d]">履歷登記</a>
+            <a href="4.html" class="opacity-80 px-2 text-white">發情管理</a>
+        </div>
     </header>
 
-    <main class="max-w-3xl mx-auto p-8">
-        <div class="form-card p-8 md:p-12">
-            <form id="profileForm" class="space-y-6">
+    <main class="max-w-3xl mx-auto p-4 md:p-8">
+        <div class="form-card p-5 md:p-12">
+            <form id="profileForm" class="space-y-5 md:space-y-6">
                 <div><label>鹿隻識別碼 (耳標/晶片號)</label><input type="text" id="deer_id" required class="input-field" placeholder="例如: 0x8183"></div>
                 <div><label>實測體重數據 (公斤)</label><input type="number" step="0.01" id="weight" required class="input-field" placeholder="請輸入體重數據"></div>
                 <div><label>出生日期紀錄</label><input type="date" id="birthday" required class="input-field"></div>
                 <div><label>性別分類</label><select id="gender" class="input-field bg-white"><option value="母鹿">母鹿</option><option value="公鹿">公鹿</option></select></div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label>遺傳親代：父畜耳標 (自動聯動)</label><select id="father_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
-                    <div><label>遺傳親代：母畜耳標 (自動聯動)</label><select id="mother_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:grid-cols-2 md:gap-6">
+                    <div><label>遺傳親代：父畜耳標</label><select id="father_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
+                    <div><label>遺傳親代：母畜耳標</label><select id="mother_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
                 </div>
                 
                 <div><label>累計繁育成功胎次 (次)</label><input type="number" id="breeding_count" class="input-field" value="0" min="0"></div>
                 <div><label>指定配置管理欄位</label><select id="pen_id" class="input-field bg-white"><option value="A1">A1 欄位 (公鹿區)</option><option value="B1">B1 欄位 (母鹿區)</option><option value="C1">C1 欄位 (隔離區)</option></select></div>
                 
-                <div class="pt-2"><button type="submit" class="submit-btn transition">送出履歷並同步至 Supabase 雲端</button></div>
+                <div class="pt-2"><button type="submit" class="submit-btn transition text-sm md:text-base">送出履歷並同步至 Supabase 雲端</button></div>
             </form>
         </div>
     </main>
