@@ -9,7 +9,7 @@
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body class="bg-[#f2efea] flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border-t-8 border-[#8B6B4D]">
+    <div id="appContent" class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border-t-8 border-[#8B6B4D] hidden">
         <div class="text-center mb-8">
             <h2 class="text-2xl font-black text-gray-800">智慧茸鹿管理平台</h2>
             <p class="text-xs text-gray-400 mt-1">請登入您的場域管理員帳號</p>
@@ -35,47 +35,115 @@
             <i class="fa-brands fa-line text-xl"></i><span>LINE 帳號快速登入</span>
         </button>
     </div>
+
     <script>
         const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
+
+        // 常規網頁帳密登入流程
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
             const res = await fetch(`${API_BASE}/auth/login`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value })
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    username: document.getElementById('username').value, 
+                    password: document.getElementById('password').value 
+                })
             });
             const data = await res.json();
             if(res.ok) {
                 localStorage.setItem('deer_token', data.access_token);
                 localStorage.setItem('deer_user', data.username);
                 checkUserFieldStatus(data.access_token);
-            } else { alert(data.detail || "登入失敗，帳密有誤"); }
+            } else { 
+                alert(data.detail || "登入失敗，帳密有誤"); 
+            }
         };
+
+        // 檢查該使用者目前有沒有綁定場域，決定跳轉去哪裡
         async function checkUserFieldStatus(token) {
-            const res = await fetch(`${API_BASE}/auth/check-field?token=${token}`);
-            const data = await res.json();
-            if(data.has_field) { window.location.href = 'index.html'; }
-            else { window.location.href = 'bind-field.html'; }
-        }
-        async function initLine() {
             try {
-                await liff.init({ liffId: "2010373192-WnuES7Ga" }); // 👈 這裡記得換成你的 LIFF ID
-                document.getElementById('lineLoginBtn').onclick = () => { if(!liff.isLoggedIn()) liff.login(); else handleLineAuth(); };
-                if(liff.isLoggedIn()) handleLineAuth();
-            } catch(e) {}
-        }
-        async function handleLineAuth() {
-            const p = await liff.getProfile();
-            const res = await fetch(`${API_BASE}/auth/line-login`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ line_user_id: p.userId, username_alias: p.displayName })
-            });
-            const data = await res.json();
-            if(res.ok) {
-                localStorage.setItem('deer_token', data.access_token);
-                localStorage.setItem('deer_user', data.username);
-                checkUserFieldStatus(data.access_token);
+                const res = await fetch(`${API_BASE}/auth/check-field?token=${token}`);
+                const data = await res.json();
+                if(data.has_field) { 
+                    // 💡 如果是用選單直進，強烈建議直接跳轉 index.html 或 dashboard.html
+                    window.location.href = 'index.html'; 
+                } else { 
+                    window.location.href = 'bind-field.html'; 
+                }
+            } catch (err) {
+                console.error("檢查場域狀態失敗", err);
+                window.location.href = 'bind-field.html';
             }
         }
+
+        // 初始化 LINE LIFF 機制
+        async function initLine() {
+            try {
+                // 1. 這裡使用你提供的真實 LIFF ID 進行初始化
+                await liff.init({ liffId: "2010373192-WnuES7Ga" }); 
+
+                // 手動點擊 LINE 快速登入按鈕的行為
+                document.getElementById('lineLoginBtn').onclick = () => { 
+                    if (!liff.isLoggedIn()) {
+                        liff.login(); 
+                    } else {
+                        handleLineAuth(); 
+                    }
+                };
+
+                // 2. 🚀 行動端流暢核心：如果已經在 LINE 內開網頁，直接進入自動認證
+                if (liff.isLoggedIn()) { 
+                    handleLineAuth(); 
+                } else {
+                    // 如果不是在 LINE 內打開，也沒有登入過，才掀開面紗顯示登入畫面給一般訪客看
+                    document.getElementById('appContent').classList.remove('hidden');
+                }
+            } catch(e) {
+                console.error("LIFF 初始化失敗:", e);
+                // 發生錯誤時防禦降級，展示常規登入框
+                document.getElementById('appContent').classList.remove('hidden');
+            }
+        }
+
+        // 核心修正：撈取 LINE Profiles 並完美撞擊後端
+        async function handleLineAuth() {
+            try {
+                const p = await liff.getProfile();
+                
+                // 🚨【大臭蟲修正點】
+                // 欄位名稱必須與 FastAPI 後端的 LineLoginPayload (line_user_id 和 display_name) 100% 對齊！
+                const res = await fetch(`${API_BASE}/auth/line-login`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        line_user_id: p.userId, 
+                        display_name: p.displayName  // 👈 改為 display_name，徹底消滅 400 錯誤！
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (res.ok) {
+                    // 自動存入核發下來的萬能通行證 Token
+                    localStorage.setItem('deer_token', data.access_token);
+                    localStorage.setItem('deer_user', data.username);
+                    
+                    // 順利放行跳轉
+                    checkUserFieldStatus(data.access_token);
+                } else {
+                    console.error("後端驗證未通過:", data.detail);
+                    alert("⚠️ 存取失敗：" + (data.detail || "您的 LINE 帳號尚未初次綁定場域，請先至官方帳號輸入代碼！"));
+                    // 驗證失敗則展示常規輸入框，讓其可以使用帳密
+                    document.getElementById('appContent').classList.remove('hidden');
+                }
+            } catch (err) {
+                console.error("LINE 認證過程中發生重大崩潰:", err);
+                document.getElementById('appContent').classList.remove('hidden');
+            }
+        }
+
+        // 啟動大腦
         initLine();
     </script>
 </body>
