@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧茸鹿管理系統 - 登入</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body class="bg-[#f2efea] flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border-t-8 border-[#8B6B4D]">
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-black text-gray-800">智慧茸鹿管理平台</h2>
+            <p class="text-xs text-gray-400 mt-1">請登入您的場域管理員帳號</p>
+        </div>
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">管理員帳號</label>
+                <input type="text" id="username" required class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]" placeholder="請輸入使用者名稱">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">安全密碼</label>
+                <input type="password" id="password" required class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]" placeholder="請輸入密碼">
+            </div>
+            <button type="submit" class="w-full py-3 bg-[#8B6B4D] text-white font-bold rounded-xl text-sm hover:bg-[#72563D] transition">管理員登入</button>
+        </form>
+        <div class="text-center mt-4">
+            <a href="register.html" class="text-xs text-[#8B6B4D] font-bold hover:underline">還沒有帳號？點此註冊專屬管理員</a>
+        </div>
+        <div class="relative my-6 text-center">
+            <hr class="border-gray-200"><span class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-[10px] text-gray-400 font-bold">或使用行動端</span>
+        </div>
+        <button id="lineLoginBtn" class="w-full py-3 bg-[#06C755] text-white font-bold rounded-xl text-sm hover:bg-[#05b04b] transition flex items-center justify-center space-x-2">
+            <i class="fa-brands fa-line text-xl"></i><span>LINE 帳號快速登入</span>
+        </button>
+    </div>
+    <script>
+        const API_BASE = "https://deer-backend-api.onrender.com/api";
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value })
+            });
+            const data = await res.json();
+            if(res.ok) {
+                localStorage.setItem('deer_token', data.access_token);
+                localStorage.setItem('deer_user', data.username);
+                checkUserFieldStatus(data.access_token);
+            } else { alert(data.detail || "登入失敗，帳密有誤"); }
+        };
+        async function checkUserFieldStatus(token) {
+            const res = await fetch(`${API_BASE}/auth/check-field?token=${token}`);
+            const data = await res.json();
+            if(data.has_field) { window.location.href = 'index.html'; }
+            else { window.location.href = 'bind-field.html'; }
+        }
+        async function initLine() {
+            try {
+                await liff.init({ liffId: "你的LINE-LIFF-ID" }); // 👈 這裡記得換成你的 LIFF ID
+                document.getElementById('lineLoginBtn').onclick = () => { if(!liff.isLoggedIn()) liff.login(); else handleLineAuth(); };
+                if(liff.isLoggedIn()) handleLineAuth();
+            } catch(e) {}
+        }
+        async function handleLineAuth() {
+            const p = await liff.getProfile();
+            const res = await fetch(`${API_BASE}/auth/line-login`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ line_user_id: p.userId, username_alias: p.displayName })
+            });
+            const data = await res.json();
+            if(res.ok) {
+                localStorage.setItem('deer_token', data.access_token);
+                localStorage.setItem('deer_user', data.username);
+                checkUserFieldStatus(data.access_token);
+            }
+        }
+        initLine();
+    </script>
+</body>
+</html>
