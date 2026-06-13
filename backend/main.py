@@ -8,13 +8,12 @@ import jwt
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 # ── 啟動診斷日誌 ──────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="臺灣鹿發情監測與繁殖管理系統 - Data API 正式版")
+app = FastAPI(title="臺灣鹿發情監測與繁殖管理系統 - Data API 無 Pydantic 正式版")
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,47 +27,16 @@ app.add_middleware(
 SECRET_KEY = os.getenv("JWT_SECRET", "NPUST_IM_CLASS_3A_SECRET_KEY_2026")
 ALGORITHM = "HS256"
 
-# 從環境變數讀取，若未設定則預設使用你截圖中的專案網址
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://mdnthhgbcpmylulmnzwk.supabase.co/rest/v1")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "") # 👈 記得在 Render 設定你的 anon key
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
-# 建立請求時必備的 Supabase 標頭 (Headers)
 def get_supabase_headers():
-    if not SUPABASE_KEY:
-        logger.warning("⚠️ SUPABASE_KEY 未設定，Data API 請求可能會失敗！")
     return {
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
         "Content-Type": "application/json",
         "Prefer": "return=representation"
     }
-
-# ── Pydantic 資料驗證模型 ──────────────────────────────────────
-class UserRegister(BaseModel):
-    username: str
-    password: str
-    email: Optional[str] = None
-
-class UserLogin(BaseModel):
-    username: str
-    password: str
-
-class FieldBindPayload(BaseModel):
-    field_id: str
-
-class LineLoginPayload(BaseModel):
-    line_user_id: str
-    username_alias: str
-
-class DeerProfileCreate(BaseModel):
-    deer_id: str
-    weight: float
-    birthday: str
-    gender: str
-    father_id: Optional[str] = None
-    mother_id: Optional[str] = None
-    breeding_count: int = 0
-    pen_id: str
 
 # ── 安全驗證輔助邏輯 ──────────────────────────────────────────
 def hash_password(password: str) -> str:
@@ -80,7 +48,6 @@ def get_current_user_from_token(token: str) -> dict:
         username: str = payload.get("sub")
         if username is None: raise HTTPException(status_code=401, detail="無效憑證")
         
-        # 透過 Data API 去 users 資料表撈取該管理員資料
         url = f"{SUPABASE_URL}/users?username=eq.{username}"
         res = requests.get(url, headers=get_supabase_headers())
         users = res.json()
@@ -89,38 +56,48 @@ def get_current_user_from_token(token: str) -> dict:
     except Exception:
         raise HTTPException(status_code=401, detail="憑證驗證失敗或已過期")
 
-# ── 🔐 帳號認證與場域綁定端點 (全面改為 Data API 語法) ───────────
+# ── 🔐 帳號認證與場域綁定端點 (改用標準 dict 接收資料) ───────────
 @app.post("/api/auth/register")
-def register_user(user: UserRegister):
-    # 檢查用戶是否已存在
-    check_url = f"{SUPABASE_URL}/users?username=eq.{user.username}"
+def register_user(payload: dict):
+    username = payload.get("username")
+    password = payload.get("password")
+    email = payload.get("email")
+    if not username or not password:
+        raise HTTPException(status_code=400, detail="帳號與密碼為必填項目")
+
+    check_url = f"{SUPABASE_URL}/users?username=eq.{username}"
     if requests.get(check_url, headers=get_supabase_headers()).json():
         raise HTTPException(status_code=400, detail="該管理員帳號已被註冊")
     
-    # 寫入新帳號
-    payload = {"username": user.username, "hashed_password": hash_password(user.password), "email": user.email}
-    res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=payload)
+    insert_payload = {"username": username, "hashed_password": hash_password(password), "email": email}
+    res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=insert_payload)
     if res.status_code not in [200, 201]: raise HTTPException(status_code=500, detail="資料庫寫入失敗")
     return {"status": "success"}
 
 @app.post("/api/auth/login")
-def login_user(user: UserLogin):
-    url = f"{SUPABASE_URL}/users?username=eq.{user.username}"
+def login_user(payload: dict):
+    username = payload.get("username")
+    password = payload.get("password")
+    
+    url = f"{SUPABASE_URL}/users?username=eq.{username}"
     users = requests.get(url, headers=get_supabase_headers()).json()
-    if not users or users[0].get("hashed_password") != hash_password(user.password):
+    if not users or users[0].get("hashed_password") != hash_password(password):
         raise HTTPException(status_code=400, detail="帳號或密碼不正確")
     token = jwt.encode({"sub": users[0]["username"]}, SECRET_KEY, algorithm=ALGORITHM)
     return {"status": "success", "access_token": token, "username": users[0]["username"]}
 
 @app.post("/api/auth/line-login")
-def line_login(payload: LineLoginPayload):
-    url = f"{SUPABASE_URL}/users?line_user_id=eq.{payload.line_user_id}"
+def line_login(payload: dict):
+    line_user_id = payload.get("line_user_id")
+    if not line_user_id:
+        raise HTTPException(status_code=400, detail="缺少 LINE User ID")
+
+    url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
     users = requests.get(url, headers=get_supabase_headers()).json()
     
     if not users:
-        # 首次登入，利用 Data API 自動在雲端開戶
-        new_user = {"username": f"line_{payload.line_user_id[:8]}", "hashed_password": None, "line_user_id": payload.line_user_id}
-        res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user)
+        new_user = {"username": f"line_{line_user_id[:8]}", "hashed_password": None, "line_user_id": line_user_id}
+        requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user)
         current_username = new_user["username"]
     else:
         current_username = users[0]["username"]
@@ -137,18 +114,17 @@ def check_user_field_status(token: str):
     return {"has_field": False}
 
 @app.post("/api/auth/bind-field")
-def bind_field_to_user(payload: FieldBindPayload, token: str):
+def bind_field_to_user(payload: dict, token: str):
     user = get_current_user_from_token(token)
+    field_id = payload.get("field_id")
     
-    # 檢查系統是否有這個場域 ID
-    f_url = f"{SUPABASE_URL}/fields?field_id=eq.{payload.field_id}"
+    f_url = f"{SUPABASE_URL}/fields?field_id=eq.{field_id}"
     if not requests.get(f_url, headers=get_supabase_headers()).json():
         raise HTTPException(status_code=404, detail="系統內找不到此專屬場域 ID，請重新確認輸入")
         
-    # 綁定對應關係
-    bind_payload = {"user_id": user["id"], "field_id": payload.field_id, "role": "admin"}
+    bind_payload = {"user_id": user["id"], "field_id": field_id, "role": "admin"}
     requests.post(f"{SUPABASE_URL}/user_field_mappings", headers=get_supabase_headers(), json=bind_payload)
-    return {"status": "success", "field_id": payload.field_id}
+    return {"status": "success", "field_id": field_id}
 
 # ── 🌲 模擬資料自動化注入端點 ──────────────────────────────────
 @app.post("/api/simulator/inject")
@@ -168,7 +144,7 @@ def inject_mock_data():
     requests.post(f"{SUPABASE_URL}/behavior_logs", headers=get_supabase_headers(), json=log_payload)
     return {"status": "success"}
 
-# ── 🦌 常規業務核心資料處理路由 ──────────────────────────────────
+# ── 🦌 既有業務核心資料處理路由 ──────────────────────────────────
 @app.get("/api/environment/current")
 def get_current_environment():
     url = f"{SUPABASE_URL}/environmental_records?order=recorded_at.desc&limit=1"
@@ -184,7 +160,6 @@ def get_environment_history():
     if not records:
         return {"times": ['06:00', '12:00', '18:00'], "temperatures": [21.4, 27.5, 23.4]}
     records.reverse()
-    # 轉換 ISO 時間字串
     times = [datetime.datetime.fromisoformat(r["recorded_at"].replace("Z", "+00:00")).strftime("%H:%M") for r in records]
     return {"times": times, "temperatures": [float(r["temperature"]) for r in records]}
 
@@ -193,8 +168,7 @@ def get_all_deer():
     return requests.get(f"{SUPABASE_URL}/deer_profiles", headers=get_supabase_headers()).json()
 
 @app.post("/api/deer")
-def register_deer(deer: DeerProfileCreate):
-    payload = {"deer_id": deer.deer_id, "weight": deer.weight, "birthday": deer.birthday, "gender": deer.gender, "father_id": deer.father_id, "mother_id": deer.mother_id, "breeding_count": deer.breeding_count, "pen_id": deer.pen_id}
+def register_deer(payload: dict):
     res = requests.post(f"{SUPABASE_URL}/deer_profiles", headers=get_supabase_headers(), json=payload)
     if res.status_code not in [200, 201]: raise HTTPException(status_code=400, detail="識別號重複或寫入出錯")
     return {"status": "success"}
@@ -231,7 +205,6 @@ def get_estrus_statistics():
     s_url = f"{SUPABASE_URL}/behavior_logs?behavior_type=eq.Standing&select=count"
     f_url = f"{SUPABASE_URL}/behavior_logs?behavior_type=eq.FO&select=count"
     
-    # 讀取 Prefer 標頭以獲取單純計數
     h = get_supabase_headers()
     h["Prefer"] = "count=exact"
     
