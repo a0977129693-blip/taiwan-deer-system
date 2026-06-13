@@ -58,7 +58,7 @@
         }
         async function initLine() {
             try {
-                await liff.init({ liffId: "你的LINE-LIFF-ID" }); // 👈 這裡記得換成你的 LIFF ID
+                await liff.init({ liffId: "2010373192-WnuES7Ga" }); // 👈 這裡記得換成你的 LIFF ID
                 document.getElementById('lineLoginBtn').onclick = () => { if(!liff.isLoggedIn()) liff.login(); else handleLineAuth(); };
                 if(liff.isLoggedIn()) handleLineAuth();
             } catch(e) {}
