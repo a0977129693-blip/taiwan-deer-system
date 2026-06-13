@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧茸鹿管理系統 - 綁定場域</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f2efea] flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border-t-8 border-amber-500">
+        <h2 class="text-xl font-black text-gray-800 text-center mb-2">安全認證：接入智慧場域</h2>
+        <p class="text-xs text-gray-400 text-center mb-6">您的帳號尚未接入監測站點，請輸入由校方或業者核發的場域金鑰編碼</p>
+        <form id="bindForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-1">場域識別識別碼 (Field ID)</label>
+                <input type="text" id="field_id" required class="w-full px-4 py-2.5 border rounded-xl text-sm font-mono uppercase tracking-wider text-center border-amber-300 bg-amber-50" placeholder="例如: FIELD_NPUST_01">
+            </div>
+            <button type="submit" class="w-full py-3 bg-amber-500 text-white font-bold rounded-xl text-sm hover:bg-amber-600 transition">驗證並綁定雲端數據流</button>
+        </form>
+    </div>
+    <script>
+        const API_BASE = "https://deer-backend-api.onrender.com/api";
+        const token = localStorage.getItem('deer_token');
+        if(!token) window.location.href = 'login.html';
+
+        document.getElementById('bindForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const fieldId = document.getElementById('field_id').value.trim().toUpperCase();
+            const res = await fetch(`${API_BASE}/auth/bind-field?token=${token}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ field_id: fieldId })
+            });
+            if(res.ok) { alert("🎉 成功對接物聯網雲端終端！歡迎進入管理看板。"); window.location.href = 'index.html'; }
+            else { const d = await res.json(); alert(d.detail || "綁定失敗，查無此場域代碼。"); }
+        };
+    </script>
+</body>
+</html>
