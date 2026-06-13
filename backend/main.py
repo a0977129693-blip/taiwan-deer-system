@@ -115,16 +115,47 @@ def check_user_field_status(token: str):
 
 @app.post("/api/auth/bind-field")
 def bind_field_to_user(payload: dict, token: str):
-    user = get_current_user_from_token(token)
-    field_id = payload.get("field_id")
+    # 💡 終極自適應修正：優先檢查 Payload 裡面有沒有帶 line_user_id
+    line_user_id = payload.get("line_user_id")
     
+    if line_user_id:
+        # 如果是從 LINE/Make 來的，我們直接用 line_user_id 去 users 表抓出這個人！
+        url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
+        users = requests.get(url, headers=get_supabase_headers()).json()
+        if users:
+            user = users[0]
+        else:
+            # 防呆：如果 users 找不到，改用 line_開頭的帳號找
+            short_username = f"line_{line_user_id[:8]}"
+            url_alt = f"{SUPABASE_URL}/users?username=eq.{short_username}"
+            users_alt = requests.get(url_alt, headers=get_supabase_headers()).json()
+            user = users_alt[0] if users_alt else {"id": 1}
+    else:
+        # 如果是從常規網頁端來的（沒有帶 line_user_id），才去解密 token 拿帳號
+        user = get_current_user_from_token(token)
+    
+    field_id = payload.get("field_id")
+    if not field_id:
+        raise HTTPException(status_code=400, detail="缺少 field_id 參數")
+    
+    # 檢查系統是否有這個場域 ID
     f_url = f"{SUPABASE_URL}/fields?field_id=eq.{field_id}"
     if not requests.get(f_url, headers=get_supabase_headers()).json():
         raise HTTPException(status_code=404, detail="系統內找不到此專屬場域 ID，請重新確認輸入")
         
+    # 建立映射關係：先檢查是否已經有舊的綁定，有的話先刪除（達到更換場域的效果）
+    check_map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
+    existing_maps = requests.get(check_map_url, headers=get_supabase_headers()).json()
+    if existing_maps:
+        # 刪除舊的綁定
+        delete_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
+        requests.delete(delete_url, headers=get_supabase_headers())
+
+    # 寫入全新或更新後的綁定關係
     bind_payload = {"user_id": user["id"], "field_id": field_id, "role": "admin"}
-    requests.post(f"{SUPABASE_URL}/user_field_mappings", headers=get_supabase_headers(), json=bind_payload)
-    return {"status": "success", "field_id": field_id}
+    res = requests.post(f"{SUPABASE_URL}/user_field_mappings", headers=get_supabase_headers(), json=bind_payload)
+    
+    return {"status": "success", "field_id": field_id, "user_bound": user.get("username")}
 
 # ── 🌲 模擬資料自動化注入端點 ──────────────────────────────────
 @app.post("/api/simulator/inject")
