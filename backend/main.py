@@ -86,72 +86,97 @@ def login_user(payload: dict):
     token = jwt.encode({"sub": users[0]["username"]}, SECRET_KEY, algorithm=ALGORITHM)
     return {"status": "success", "access_token": token, "username": users[0]["username"]}
 
+# 🚨【核心修改點：完美對齊 LIFF 前端自動免密登入】
 @app.post("/api/auth/line-login")
 def line_login(payload: dict):
     line_user_id = payload.get("line_user_id")
+    display_name = payload.get("display_name") # 👈 100% 對齊前端 login.html 傳過來的欄位名稱！
+    
     if not line_user_id:
         raise HTTPException(status_code=400, detail="缺少 LINE User ID")
 
+    # 1. 檢查此 LINE 帳號是否已經註冊在 user 表內
     url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
     users = requests.get(url, headers=get_supabase_headers()).json()
     
     if not users:
-        new_user = {"username": f"line_{line_user_id[:8]}", "hashed_password": None, "line_user_id": line_user_id}
-        requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user)
-        current_username = new_user["username"]
-    else:
-        current_username = users[0]["username"]
+        # 如果是首度光臨、還沒輸入過 FIELD_ 代碼開戶的訪客，幫他自動建立一個臨時身分
+        username_seed = display_name if display_name else f"line_{line_user_id[:8]}"
+        new_user = {
+            "username": username_seed, 
+            "hashed_password": None, 
+            "line_user_id": line_user_id
+        }
+        res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user)
+        user_data = res.json()[0] if res.status_code in [200, 201] else new_user
         
+        # 首度建立的用戶一定還沒有綁定場域，提示他需要先去官方帳號輸入代碼
+        token = jwt.encode({"sub": username_seed}, SECRET_KEY, algorithm=ALGORITHM)
+        raise HTTPException(status_code=403, detail="此 LINE 帳號尚未初次綁定智慧場域，請先至官方帳號輸入鹿場代碼！")
+    else:
+        user_data = users[0]
+        current_username = user_data["username"]
+        
+    # 2. 🚀【關鍵防禦補強】：去撈這個人目前綁定的是哪一個場域 ID
+    map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user_data['id']}"
+    mappings = requests.get(map_url, headers=get_supabase_headers()).json()
+    
+    # 預設如果沒有綁定關係，拋出 403 叫前端提示他去聊天室綁定
+    if not mappings:
+        raise HTTPException(status_code=403, detail="您已開通系統帳戶，但尚未綁定任何智慧場域，請先至 LINE 官方帳號輸入場域代碼！")
+        
+    bound_field_id = mappings[0]["field_id"]
+        
+    # 3. 核發管理員安全憑證
     token = jwt.encode({"sub": current_username}, SECRET_KEY, algorithm=ALGORITHM)
-    return {"status": "success", "access_token": token, "username": current_username}
+    
+    # 4. 回傳給前端完整的套件：包含了前端必須用到的 access_token 與場域對照 ID
+    return {
+        "status": "success", 
+        "access_token": token, 
+        "username": current_username,
+        "field_id": bound_field_id  # 👈 吐回場域 ID，讓前端的 checkUserFieldStatus 可以直接滑進去！
+    }
 
 @app.get("/api/auth/check-field")
 def check_user_field_status(token: str):
     user = get_current_user_from_token(token)
     url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
-    mappings = requests.get(url, headers=get_supabase_headers()).json()
+    mappings = requests.get(map_url, headers=get_supabase_headers()).json() if 'map_url' in locals() else requests.get(url, headers=get_supabase_headers()).json()
     if mappings: return {"has_field": True, "field_id": mappings[0]["field_id"]}
     return {"has_field": False}
 
 @app.post("/api/auth/bind-field")
 def bind_field_to_user(payload: dict, token: str):
-    # 💡 終極自適應修正：優先檢查 Payload 裡面有沒有帶 line_user_id
     line_user_id = payload.get("line_user_id")
     
     if line_user_id:
-        # 如果是從 LINE/Make 來的，我們直接用 line_user_id 去 users 表抓出這個人！
         url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
         users = requests.get(url, headers=get_supabase_headers()).json()
         if users:
             user = users[0]
         else:
-            # 防呆：如果 users 找不到，改用 line_開頭的帳號找
             short_username = f"line_{line_user_id[:8]}"
             url_alt = f"{SUPABASE_URL}/users?username=eq.{short_username}"
             users_alt = requests.get(url_alt, headers=get_supabase_headers()).json()
             user = users_alt[0] if users_alt else {"id": 1}
     else:
-        # 如果是從常規網頁端來的（沒有帶 line_user_id），才去解密 token 拿帳號
         user = get_current_user_from_token(token)
     
     field_id = payload.get("field_id")
     if not field_id:
         raise HTTPException(status_code=400, detail="缺少 field_id 參數")
     
-    # 檢查系統是否有這個場域 ID
     f_url = f"{SUPABASE_URL}/fields?field_id=eq.{field_id}"
     if not requests.get(f_url, headers=get_supabase_headers()).json():
         raise HTTPException(status_code=404, detail="系統內找不到此專屬場域 ID，請重新確認輸入")
         
-    # 建立映射關係：先檢查是否已經有舊的綁定，有的話先刪除（達到更換場域的效果）
     check_map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
     existing_maps = requests.get(check_map_url, headers=get_supabase_headers()).json()
     if existing_maps:
-        # 刪除舊的綁定
         delete_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
         requests.delete(delete_url, headers=get_supabase_headers())
 
-    # 寫入全新或更新後的綁定關係
     bind_payload = {"user_id": user["id"], "field_id": field_id, "role": "admin"}
     res = requests.post(f"{SUPABASE_URL}/user_field_mappings", headers=get_supabase_headers(), json=bind_payload)
     
