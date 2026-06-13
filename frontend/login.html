@@ -66,7 +66,6 @@
                 const res = await fetch(`${API_BASE}/auth/check-field?token=${token}`);
                 const data = await res.json();
                 if(data.has_field) { 
-                    // 💡 如果是用選單直進，強烈建議直接跳轉 index.html 或 dashboard.html
                     window.location.href = 'index.html'; 
                 } else { 
                     window.location.href = 'bind-field.html'; 
@@ -80,10 +79,8 @@
         // 初始化 LINE LIFF 機制
         async function initLine() {
             try {
-                // 1. 這裡使用你提供的真實 LIFF ID 進行初始化
                 await liff.init({ liffId: "2010373192-WnuES7Ga" }); 
 
-                // 手動點擊 LINE 快速登入按鈕的行為
                 document.getElementById('lineLoginBtn').onclick = () => { 
                     if (!liff.isLoggedIn()) {
                         liff.login(); 
@@ -92,58 +89,66 @@
                     }
                 };
 
-                // 2. 🚀 行動端流暢核心：如果已經在 LINE 內開網頁，直接進入自動認證
                 if (liff.isLoggedIn()) { 
                     handleLineAuth(); 
                 } else {
-                    // 如果不是在 LINE 內打開，也沒有登入過，才掀開面紗顯示登入畫面給一般訪客看
                     document.getElementById('appContent').classList.remove('hidden');
                 }
             } catch(e) {
-                console.error("LIFF 初始化失敗:", e);
-                // 發生錯誤時防禦降級，展示常規登入框
+                alert("💥 LIFF 初始化重大失敗: " + e.toString());
                 document.getElementById('appContent').classList.remove('hidden');
             }
         }
 
-        // 核心修正：撈取 LINE Profiles 並完美撞擊後端
+        // 核心偵錯功能：撈取 LINE Profiles 並完美撞擊後端
         async function handleLineAuth() {
             try {
+                // 🚨【關鍵防禦 1】：強迫瀏覽器等到 LIFF 100% 準備好才准往下走，防止搶拍抓到空值
+                await liff.ready; 
+                
                 const p = await liff.getProfile();
                 
-                // 🚨【大臭蟲修正點】
-                // 欄位名稱必須與 FastAPI 後端的 LineLoginPayload (line_user_id 和 display_name) 100% 對齊！
+                // 🚨【關鍵防禦 2】：如果真的抓到 undefined，直接就地攔截彈窗，不讓它送出噴 400
+                if (!p || !p.userId) {
+                    alert("⚠️ 錯誤：LIFF 尚未就緒，抓到的用戶 Profile 為空！");
+                    document.getElementById('appContent').classList.remove('hidden');
+                    return;
+                }
+
+                // 準備打包要發送的 JSON
+                const sendPayload = { 
+                    line_user_id: p.userId, 
+                    display_name: p.displayName || "LINE用戶"
+                };
+
+                // 🚨【偵錯發射站】：打 API 測試
                 const res = await fetch(`${API_BASE}/auth/line-login`, {
                     method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        line_user_id: p.userId, 
-                        display_name: p.displayName  // 👈 改為 display_name，徹底消滅 400 錯誤！
-                    })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(sendPayload)
                 });
 
                 const data = await res.json();
                 
                 if (res.ok) {
-                    // 自動存入核發下來的萬能通行證 Token
                     localStorage.setItem('deer_token', data.access_token);
                     localStorage.setItem('deer_user', data.username);
-                    
-                    // 順利放行跳轉
                     checkUserFieldStatus(data.access_token);
                 } else {
-                    console.error("後端驗證未通過:", data.detail);
-                    alert("⚠️ 存取失敗：" + (data.detail || "您的 LINE 帳號尚未初次綁定場域，請先至官方帳號輸入代碼！"));
-                    // 驗證失敗則展示常規輸入框，讓其可以使用帳密
+                    // 💡 如果訊號有到後端，但後端拒絕（如 403 尚未綁定場域），會精準彈窗出細節
+                    alert("🚫 後端大腦拒絕 (錯誤碼 " + res.status + "): " + JSON.stringify(data));
                     document.getElementById('appContent').classList.remove('hidden');
                 }
             } catch (err) {
-                console.error("LINE 認證過程中發生重大崩潰:", err);
+                // 🚨【抓鬼核心】：如果訊號還沒到後端就被網域、CORS、網址拼錯直接擋下，100% 會爆炸在這裡！
+                alert("💥 訊號在出門前被瀏覽器硬生生攔截！錯誤細節: " + err.toString());
                 document.getElementById('appContent').classList.remove('hidden');
             }
         }
 
-        // 啟動大腦
         initLine();
     </script>
 </body>
