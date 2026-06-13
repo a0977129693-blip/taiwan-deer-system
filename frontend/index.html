@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</title>
+    <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -26,18 +27,18 @@
                 <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-            <div class="flex items-center space-x-3 border-l border-white/20 pl-4 md:pl-6">
+            <div class="flex items-center space-x-3 border-l border-white/20 pl-4 md:pl-6 cursor-pointer" onclick="logoutSystem()">
                 <div class="text-right">
-                    <p class="text-[9px] opacity-60">jush123 已登入</p>
-                    <p class="text-xs md:text-sm font-bold uppercase">李仲琨</p>
+                    <p class="text-[9px] opacity-60">管理員已登入，點此登出</p>
+                    <p class="text-xs md:text-sm font-bold uppercase id-user-name">李仲琨</p>
                 </div>
-                <div class="w-8 h-8 md:w-10 md:h-10 bg-amber-100 rounded-full flex items-center justify-center cursor-pointer shadow-inner">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-amber-100 rounded-full flex items-center justify-center shadow-inner">
                     <i class="fa-solid fa-user text-[#8B6B4D] text-xs md:text-base"></i>
                 </div>
             </div>
         </div>
         <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
-            <a href="index.html" class="text-shadow-sm text-shadow-sm border-b-2 border-[#fcd34d] pb-0.5 px-2 text-[#fcd34d]">環境數據</a>
+            <a href="index.html" class="text-shadow-sm border-b-2 border-[#fcd34d] pb-0.5 px-2 text-[#fcd34d]">環境數據</a>
             <a href="2.html" class="opacity-80 px-2 text-white">鹿舍總覽</a>
             <a href="3.html" class="opacity-80 px-2 text-white">履歷登記</a>
             <a href="4.html" class="opacity-80 px-2 text-white">發情管理</a>
@@ -74,6 +75,11 @@
     </main>
 
     <script>
+        // 動態將右上角的用戶名換成登入成功的帳號
+        document.querySelectorAll('.id-user-name').forEach(el => {
+            el.innerText = localStorage.getItem('deer_user') || "李仲琨";
+        });
+
         const API_BASE = "https://deer-backend-api.onrender.com/api";
 
         const getGaugeOption = (value, min, max, mainColor) => ({
