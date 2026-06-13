@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 發情記錄管理</title>
+    <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -24,7 +25,9 @@
                 <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-active flex items-center">發情記錄管理</a>
             </nav>
-            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 text-right"><span class="text-sm font-bold uppercase">李仲琨</span></div>
+            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 text-right cursor-pointer" onclick="logoutSystem()">
+                <span class="text-sm font-bold uppercase id-user-name">李仲琨</span>
+            </div>
         </div>
         <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
             <a href="index.html" class="opacity-80 px-2 text-white">環境數據</a>
@@ -87,13 +90,17 @@
     </div>
 
     <script>
+        document.querySelectorAll('.id-user-name').forEach(el => {
+            el.innerText = localStorage.getItem('deer_user') || "李仲琨";
+        });
+
         const API_BASE = "https://deer-backend-api.onrender.com/api";
         const activityChart = echarts.init(document.getElementById('activityChart'));
 
         activityChart.setOption({
             tooltip: { trigger: 'axis' },
             grid: { left: '3%', right: '4%', bottom: '5%', containLabel: true },
-            xAxis: { type: 'category', data: ['02/11', '02/12', '02/13', '02/14', '02/15', '02/16', '02/17'] },
+            xAxis: { type: 'category', data: ['06/09', '06/10', '06/11', '06/12', '06/13', '06/14', '06/15'] },
             yAxis: { type: 'value', min: 0, max: 300 },
             series: [{ name: '個別活動指數', type: 'line', data: [112, 108, 125, 118, 121, 115, 110], smooth: true, lineStyle: { color: '#10b981', width: 3 } }]
         });
@@ -155,6 +162,7 @@
 
         bindDeerFilter();
         pollRealtimeMetrics();
+        // 維持原汁原味的 4 秒定時自動重新整理輪詢
         setInterval(pollRealtimeMetrics, 4000);
         window.addEventListener('resize', () => { activityChart.resize(); });
     </script>
