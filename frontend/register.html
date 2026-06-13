@@ -27,7 +27,7 @@
         <div class="text-center mt-4"><a href="login.html" class="text-xs text-gray-400 hover:underline">已有帳號？返回登入</a></div>
     </div>
     <script>
-        const API_BASE = "https://deer-backend-api.onrender.com/api";
+        const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
         document.getElementById('regForm').onsubmit = async (e) => {
             e.preventDefault();
             const res = await fetch(`${API_BASE}/auth/register`, {
