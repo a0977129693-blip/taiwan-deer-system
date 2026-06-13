@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 鹿隻資料登記</title>
+    <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -28,7 +29,9 @@
                 <a href="3.html" class="nav-active flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-            <div class="flex items-center space-x-4 border-l border-white/20 pl-6"><span class="text-sm font-bold uppercase">李仲琨</span></div>
+            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 cursor-pointer" onclick="logoutSystem()">
+                <span class="text-sm font-bold uppercase id-user-name">李仲琨</span>
+            </div>
         </div>
         <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
             <a href="index.html" class="opacity-80 px-2 text-white">環境數據</a>
@@ -41,18 +44,18 @@
     <main class="max-w-3xl mx-auto p-4 md:p-8">
         <div class="form-card p-5 md:p-12">
             <form id="profileForm" class="space-y-5 md:space-y-6">
-                <div><label>鹿隻識別碼 (耳標/晶片號)</label><input type="text" id="deer_id" required class="input-field" placeholder="例如: 0x8183"></div>
-                <div><label>實測體重數據 (公斤)</label><input type="number" step="0.01" id="weight" required class="input-field" placeholder="請輸入體重數據"></div>
-                <div><label>出生日期紀錄</label><input type="date" id="birthday" required class="input-field"></div>
-                <div><label>性別分類</label><select id="gender" class="input-field bg-white"><option value="母鹿">母鹿</option><option value="公鹿">公鹿</option></select></div>
+                <div><label class="block text-sm font-bold mb-1">鹿隻識別碼 (耳標/晶片號)</label><input type="text" id="deer_id" required class="input-field" placeholder="例如: 0x8183"></div>
+                <div><label class="block text-sm font-bold mb-1">實測體重數據 (公斤)</label><input type="number" step="0.01" id="weight" required class="input-field" placeholder="請輸入體重數據"></div>
+                <div><label class="block text-sm font-bold mb-1">出生日期紀錄</label><input type="date" id="birthday" required class="input-field"></div>
+                <div><label class="block text-sm font-bold mb-1">性別分類</label><select id="gender" class="input-field bg-white"><option value="母鹿">母鹿</option><option value="公鹿">公鹿</option></select></div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:grid-cols-2 md:gap-6">
-                    <div><label>遺傳親代：父畜耳標</label><select id="father_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
-                    <div><label>遺傳親代：母畜耳標</label><select id="mother_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
+                    <div><label class="block text-sm font-bold mb-1">遺傳親代：父畜耳標</label><select id="father_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
+                    <div><label class="block text-sm font-bold mb-1">遺傳親代：母畜耳標</label><select id="mother_id" class="input-field bg-white"><option value="無">無歷史紀錄</option></select></div>
                 </div>
                 
-                <div><label>累計繁育成功胎次 (次)</label><input type="number" id="breeding_count" class="input-field" value="0" min="0"></div>
-                <div><label>指定配置管理欄位</label><select id="pen_id" class="input-field bg-white"><option value="A1">A1 欄位 (公鹿區)</option><option value="B1">B1 欄位 (母鹿區)</option><option value="C1">C1 欄位 (隔離區)</option></select></div>
+                <div><label class="block text-sm font-bold mb-1">累計繁育成功胎次 (次)</label><input type="number" id="breeding_count" class="input-field" value="0" min="0"></div>
+                <div><label class="block text-sm font-bold mb-1">指定配置管理欄位</label><select id="pen_id" class="input-field bg-white"><option value="A1">A1 欄位 (公鹿區)</option><option value="B1">B1 欄位 (母鹿區)</option><option value="C1">C1 欄位 (隔離區)</option></select></div>
                 
                 <div class="pt-2"><button type="submit" class="submit-btn transition text-sm md:text-base">送出履歷並同步至 Supabase 雲端</button></div>
             </form>
@@ -60,6 +63,10 @@
     </main>
 
     <script>
+        document.querySelectorAll('.id-user-name').forEach(el => {
+            el.innerText = localStorage.getItem('deer_user') || "李仲琨";
+        });
+
         const API_BASE = "https://deer-backend-api.onrender.com/api";
 
         async function populateParentsDropdown() {
@@ -85,8 +92,8 @@
                 weight: parseFloat(document.getElementById('weight').value),
                 birthday: document.getElementById('birthday').value,
                 gender: document.getElementById('gender').value,
-                father_id: document.getElementById('father_id').value,
-                mother_id: document.getElementById('mother_id').value,
+                father_id: document.getElementById('father_id').value == "無" ? null : document.getElementById('father_id').value,
+                mother_id: document.getElementById('mother_id').value == "無" ? null : document.getElementById('mother_id').value,
                 breeding_count: parseInt(document.getElementById('breeding_count').value) || 0,
                 pen_id: document.getElementById('pen_id').value
             };
