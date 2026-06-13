@@ -13,11 +13,13 @@ from sqlalchemy import create_engine, Column, String, Float, Integer, Date, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
+# ── 啟動診斷日誌 ──────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="臺灣鹿發情監測與繁殖管理系統 - 完整正式版 API")
 
+# 允許全網域跨來源資源共享 (CORS)，確保 Vercel 前端能無阻礙存取 Render 後端
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,11 +28,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── 安全加密憑證配置 ──────────────────────────────────────────
 SECRET_KEY = os.getenv("JWT_SECRET", "NPUST_IM_CLASS_3A_SECRET_KEY_2026")
 ALGORITHM = "HS256"
 
+# ── 資料庫連線配置 ────────────────────────────────────────────
 _raw_url = os.getenv("DATABASE_URL", "")
 if not _raw_url:
+    logger.warning("⚠️ DATABASE_URL 未設定！使用本地 SQLite 模擬。")
     DATABASE_URL = "sqlite:///./taiwan_deer.db"
 elif _raw_url.startswith("postgres://"):
     DATABASE_URL = _raw_url.replace("postgres://", "postgresql://", 1)
@@ -45,13 +50,13 @@ else:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# ── ORM Models ────────────────────────────────────────────────
+# ── 資料庫 ORM 模型定義 ────────────────────────────────────────
 class UserModel(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(100), unique=True, nullable=False)
-    hashed_password = Column(String(255), nullable=True)
-    line_user_id = Column(String(100), unique=True, nullable=True)
+    hashed_password = Column(String(255), nullable=True) # LINE 快速登入此欄位為空
+    line_user_id = Column(String(100), unique=True, nullable=True) # 聯動 LINE 核心 ID
     email = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -98,15 +103,16 @@ class BehaviorLogModel(Base):
 
 try:
     Base.metadata.create_all(bind=engine)
+    logger.info("✅ 資料表與雙軌制安全架構同步成功")
 except Exception as e:
-    logger.error(f"資料表同步失敗: {e}")
+    logger.error(f"⚠️ 資料表建立失敗: {e}")
 
 def get_db():
     db = SessionLocal()
     try: yield db
     finally: db.close()
 
-# ── Pydantic Schemas ──────────────────────────────────────────
+# ── Pydantic 資料驗證模型 ──────────────────────────────────────
 class UserRegister(BaseModel):
     username: str
     password: str
@@ -135,9 +141,11 @@ class DeerProfileCreate(BaseModel):
 
 # ── 安全驗證邏輯 ──────────────────────────────────────────────
 def hash_password(password: str) -> str:
+    """使用單向雜湊 SHA256 加密密碼"""
     return hashlib.sha256(password.encode()).hexdigest()
 
 def get_current_user_from_token(token: str, db: Session) -> UserModel:
+    """解析 JWT 安全憑證並回傳當前登入者"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -148,7 +156,7 @@ def get_current_user_from_token(token: str, db: Session) -> UserModel:
     except Exception:
         raise HTTPException(status_code=401, detail="憑證驗證失敗或已過期")
 
-# ── 🔐 帳號身分與場域綁定端點 ──────────────────────────────────
+# ── 🔐 認證與多租戶場域綁定端點 ───────────────────────────────
 @app.post("/api/auth/register")
 def register_user(user: UserRegister, db: Session = Depends(get_db)):
     existing = db.query(UserModel).filter(UserModel.username == user.username).first()
@@ -168,6 +176,7 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
 
 @app.post("/api/auth/line-login")
 def line_login(payload: LineLoginPayload, db: Session = Depends(get_db)):
+    """LINE 登入核心：首次登入自動開戶，老用戶直接核發 JWT 憑證"""
     db_user = db.query(UserModel).filter(UserModel.line_user_id == payload.line_user_id).first()
     if not db_user:
         db_user = UserModel(username=f"line_{payload.line_user_id[:8]}", hashed_password=None, line_user_id=payload.line_user_id)
@@ -179,14 +188,15 @@ def line_login(payload: LineLoginPayload, db: Session = Depends(get_db)):
 
 @app.get("/api/auth/check-field")
 def check_user_field_status(token: str, db: Session = Depends(get_db)):
+    """檢查當前使用者是否擁有任何鹿場 field_id 權限"""
     user = get_current_user_from_token(token, db)
     mapping = db.query(UserFieldMappingModel).filter(UserFieldMappingModel.user_id == user.id).first()
-    if mapping:
-        return {"has_field": True, "field_id": mapping.field_id}
+    if mapping: return {"has_field": True, "field_id": mapping.field_id}
     return {"has_field": False}
 
 @app.post("/api/auth/bind-field")
 def bind_field_to_user(payload: FieldBindPayload, token: str, db: Session = Depends(get_db)):
+    """將使用者與專屬場域代碼進行多對多綁定映射"""
     user = get_current_user_from_token(token, db)
     target_field = db.query(FieldModel).filter(FieldModel.field_id == payload.field_id).first()
     if not target_field:
@@ -209,7 +219,7 @@ def inject_mock_data(db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success"}
 
-# ── 🦌 常規業務核心資料處理路由 ──────────────────────────────────
+# ── 🦌 既有業務核心資料處理路由 ──────────────────────────────────
 @app.get("/api/environment/current")
 def get_current_environment(db: Session = Depends(get_db)):
     record = db.query(EnvironmentalRecordModel).order_by(desc(EnvironmentalRecordModel.recorded_at)).first()
@@ -251,7 +261,7 @@ def get_deer_tab_details(deer_id: str, tab: str, db: Session = Depends(get_db)):
         types = ["Standing", "Lying", "Walking", "Eating", "Mounting", "FO"]
         return [{"name": t, "value": (db.query(func.sum(BehaviorLogModel.duration_seconds)).filter(BehaviorLogModel.deer_id == deer_id, BehaviorLogModel.behavior_type == t).scalar() or random.randint(300, 1500))} for t in types]
     elif tab == "breeding":
-        return [{"index": i+1, "date": "2025-11-12", "status": "繁育成功"} for i in range(deer.breeding_count)]
+        return [{"index": i+1, "date": "2026-06-12", "status": "繁育成功"} for i in range(deer.breeding_count)]
 
 @app.get("/api/estrus/stats")
 def get_estrus_statistics(db: Session = Depends(get_db)):
