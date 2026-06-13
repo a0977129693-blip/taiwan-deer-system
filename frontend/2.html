@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 鹿舍總覽</title>
+    <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -14,7 +15,6 @@
         .nav-active { color: #fcd34d; border-bottom: 2px solid #fcd34d; padding-bottom: 4px; }
         .deer-btn { transition: all 0.2s; border: 1px solid rgba(139, 107, 77, 0.2); text-align: center; padding: 0.5rem 0; border-radius: 0.5rem; font-family: monospace; }
         .deer-btn-active { background-color: #8B6B4D; color: white; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        /* 隱藏滾動條 */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -30,7 +30,9 @@
                 <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
                 <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
             </nav>
-            <div class="flex items-center space-x-4 border-l border-white/20 pl-6"><span class="text-sm font-bold">李仲琨</span></div>
+            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 cursor-pointer" onclick="logoutSystem()">
+                <span class="text-sm font-bold id-user-name">李仲琨</span>
+            </div>
         </div>
         <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
             <a href="index.html" class="opacity-80 px-2 text-white">環境數據</a>
@@ -40,7 +42,7 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8 flex flex-col md:flex-row gap-6 md:space-x-8 md:gap-0">
+    <main class="max-w-7xl mx-auto p-4 md:p-8 'flex flex-col md:flex-row gap-6 md:space-x-8 md:gap-0'">
         <div class="w-full md:w-64 flex-shrink-0">
             <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm space-y-4">
                 <div>
@@ -69,11 +71,15 @@
     </main>
 
     <script>
+        document.querySelectorAll('.id-user-name').forEach(el => {
+            el.innerText = localStorage.getItem('deer_user') || "李仲琨";
+        });
+
         const API_BASE = "https://deer-backend-api.onrender.com/api";
         let allDeers = [];
         let activeDeerId = "";
         let activeTab = "profile";
-        let chartInstance = null; // 用於重新 resize
+        let chartInstance = null;
 
         async function fetchSystemDeers() {
             try {
@@ -87,7 +93,6 @@
                 allDeers.forEach((d, idx) => {
                     const btn = document.createElement('button');
                     btn.id = `deer-${d.deer_id}`;
-                    // 行動端給予 w-24 彈性寬度避免擠壓
                     btn.className = "deer-btn bg-gray-50 text-gray-600 w-24 md:w-full flex-shrink-0 text-xs md:text-sm";
                     btn.innerText = `${d.deer_id}`;
                     btn.onclick = () => selectDeerNode(d.deer_id);
@@ -191,7 +196,6 @@
                     mediaTag = `<video src="${currentVideoUrl}" controls autoplay loop muted class="w-full h-full object-cover"></video>`;
                 }
 
-                // 行動端完美 16:9 比例包裝，百分之百不破版、字體極細化處理
                 container.innerHTML = `
                     <div class="relative bg-black rounded-xl overflow-hidden aspect-video border-2 border-gray-800 shadow-xl w-full">
                         <div class="absolute top-2 left-2 bg-red-600 text-white text-[8px] md:text-[10px] px-1.5 py-0.5 rounded font-bold tracking-wider z-10 animate-pulse flex items-center">
