@@ -74,6 +74,7 @@
             }
         }
 
+        // 啟動與自動判斷
         function initLine() {
             liff.init({ liffId: "2010373192-WnuES7Ga" }) 
                 .then(() => {
@@ -87,7 +88,6 @@
                         }
                     };
 
-                    // 從圖文選單進來時的自動判定
                     if (liff.isLoggedIn()) { 
                         setTimeout(() => { handleLineAuth(false); }, 100); 
                     } else {
@@ -118,13 +118,11 @@
                 if (res.ok) {
                     localStorage.setItem('deer_token', data.access_token);
                     localStorage.setItem('deer_user', data.username);
-                    checkUserFieldStatus(data.access_token);
+                    checkUserFieldStatus(data.access_token); // 👈 這裡會順暢直奔 index.html
                 } else {
-                    // ❌ 判定未綁定
                     if (isUserInitiated) {
                         alert("⚠️ 存取失敗：" + (data.detail || "您的 LINE 帳號尚未初次綁定場域"));
                     }
-                    // 💡 如果是背景自動靜態比對被退件，直接展開常規帳密登入頁，不打擾使用者
                     showLoginForm();
                 }
             } catch (err) {
