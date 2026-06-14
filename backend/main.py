@@ -6,8 +6,22 @@ import logging
 import hashlib
 import jwt
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
+
+# ── 引入 LINE v3 SDK 相關套件 ──────────────────────────────────
+from linebot.v3.webhook import WebhookHandler
+from linebot.v3.webhooks import MessageEvent, FollowEvent
+from linebot.v3.messaging import (
+    Configuration,
+    ApiClient,
+    MessagingApi,
+    ReplyMessageRequest,
+    TextMessage,
+    QuickReply,
+    QuickReplyItem,
+    MessageAction
+)
 
 # ── 啟動診斷日誌 ──────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +43,13 @@ ALGORITHM = "HS256"
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://mdnthhgbcpmylulmnzwk.supabase.co/rest/v1")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+
+# ── 💬 LINE 官方帳號 Webhook 配置 ──────────────────────────────
+LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "YOUR_CHANNEL_SECRET")
+LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "YOUR_CHANNEL_ACCESS_TOKEN")
+
+line_config = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 def get_supabase_headers():
     return {
@@ -55,6 +76,57 @@ def get_current_user_from_token(token: str) -> dict:
         return users[0]
     except Exception:
         raise HTTPException(status_code=401, detail="憑證驗證失敗或已過期")
+
+# ── 💬 接收 LINE 官方帳號 Webhook 的端點 ────────────────────────
+@app.post("/api/callback")
+async def callback(request: Request, x_line_signature: str = Header(None)):
+    if not x_line_signature:
+        raise HTTPException(status_code=400, detail="缺少 LINE 簽章")
+    
+    body = await request.body()
+    body_str = body.decode('utf-8')
+    
+    try:
+        handler.handle(body_str, x_line_signature)
+    except Exception as e:
+        logger.error(f"Webhook 處理失敗: {e}")
+        raise HTTPException(status_code=400, detail="簽章驗證失敗")
+        
+    return 'OK'
+
+# 🟢【核心改動：當使用者加入官方 LINE 好友時自動發送引導與快捷按鈕】
+@handler.add(FollowEvent)
+def handle_follow(event: FollowEvent):
+    reply_token = event.reply_token
+    
+    # 1. 撰寫防呆引導訊息
+    welcome_text = (
+        "🦌 歡迎使用「智慧茸鹿管理系統」！\n\n"
+        "為了連動您的屏科大水鹿場域數據，請在下方對話框輸入您的【場域識別代號】。\n\n"
+        "💡 提示：您可以直接點擊下方的快捷鍵，系統會自動為您填寫開頭，您只需在後面補上您的專屬代碼並發送即可！"
+    )
+    
+    # 2. 💡 建立文字快捷鍵 (Quick Reply)，精準對齊要求設定為 FIELD_NPUST_
+    quick_reply_box = QuickReply(
+        items=[
+            QuickReplyItem(
+                action=MessageAction(
+                    label="自動帶入場域格式",
+                    text="FIELD_NPUST_"  # 👈 點擊後，聊天對話框會自動輸入此行文字
+                )
+            )
+        ]
+    )
+    
+    # 3. 透過 LINE API 回傳訊息
+    with ApiClient(line_config) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        line_bot_api.reply_message(
+            ReplyMessageRequest(
+                reply_token=reply_token,
+                messages=[TextMessage(text=welcome_text, quick_reply=quick_reply_box)]
+            )
+        )
 
 # ── 🔐 帳號認證與場域綁定端點 (改用標準 dict 接收資料) ───────────
 @app.post("/api/auth/register")
@@ -86,21 +158,18 @@ def login_user(payload: dict):
     token = jwt.encode({"sub": users[0]["username"]}, SECRET_KEY, algorithm=ALGORITHM)
     return {"status": "success", "access_token": token, "username": users[0]["username"]}
 
-# 🚨【核心修改點：完美對齊 LIFF 前端自動免密登入】
 @app.post("/api/auth/line-login")
 def line_login(payload: dict):
     line_user_id = payload.get("line_user_id")
-    display_name = payload.get("display_name") # 👈 100% 對齊前端 login.html 傳過來的欄位名稱！
+    display_name = payload.get("display_name")
     
     if not line_user_id:
         raise HTTPException(status_code=400, detail="缺少 LINE User ID")
 
-    # 1. 檢查此 LINE 帳號是否已經註冊在 user 表內
     url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
     users = requests.get(url, headers=get_supabase_headers()).json()
     
     if not users:
-        # 如果是首度光臨、還沒輸入過 FIELD_ 代碼開戶的訪客，幫他自動建立一個臨時身分
         username_seed = display_name if display_name else f"line_{line_user_id[:8]}"
         new_user = {
             "username": username_seed, 
@@ -109,40 +178,32 @@ def line_login(payload: dict):
         }
         res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user)
         user_data = res.json()[0] if res.status_code in [200, 201] else new_user
-        
-        # 首度建立的用戶一定還沒有綁定場域，提示他需要先去官方帳號輸入代碼
-        token = jwt.encode({"sub": username_seed}, SECRET_KEY, algorithm=ALGORITHM)
         raise HTTPException(status_code=403, detail="此 LINE 帳號尚未初次綁定智慧場域，請先至官方帳號輸入鹿場代碼！")
     else:
         user_data = users[0]
         current_username = user_data["username"]
         
-    # 2. 🚀【關鍵防禦補強】：去撈這個人目前綁定的是哪一個場域 ID
     map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user_data['id']}"
     mappings = requests.get(map_url, headers=get_supabase_headers()).json()
     
-    # 預設如果沒有綁定關係，拋出 403 叫前端提示他去聊天室綁定
     if not mappings:
         raise HTTPException(status_code=403, detail="您已開通系統帳戶，但尚未綁定任何智慧場域，請先至 LINE 官方帳號輸入場域代碼！")
         
     bound_field_id = mappings[0]["field_id"]
-        
-    # 3. 核發管理員安全憑證
     token = jwt.encode({"sub": current_username}, SECRET_KEY, algorithm=ALGORITHM)
     
-    # 4. 回傳給前端完整的套件：包含了前端必須用到的 access_token 與場域對照 ID
     return {
         "status": "success", 
         "access_token": token, 
         "username": current_username,
-        "field_id": bound_field_id  # 👈 吐回場域 ID，讓前端的 checkUserFieldStatus 可以直接滑進去！
+        "field_id": bound_field_id
     }
 
 @app.get("/api/auth/check-field")
 def check_user_field_status(token: str):
     user = get_current_user_from_token(token)
     url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
-    mappings = requests.get(map_url, headers=get_supabase_headers()).json() if 'map_url' in locals() else requests.get(url, headers=get_supabase_headers()).json()
+    mappings = requests.get(url, headers=get_supabase_headers()).json()
     if mappings: return {"has_field": True, "field_id": mappings[0]["field_id"]}
     return {"has_field": False}
 
