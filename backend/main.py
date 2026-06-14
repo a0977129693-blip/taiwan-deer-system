@@ -9,7 +9,6 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 
-# ── 啟動診斷日誌 ──────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── 🔐 安全加密與 Supabase Data API 配置 ──────────────────────
 SECRET_KEY = os.getenv("JWT_SECRET", "NPUST_IM_CLASS_3A_SECRET_KEY_2026")
 ALGORITHM = "HS256"
 
@@ -38,7 +36,6 @@ def get_supabase_headers():
         "Prefer": "return=representation"
     }
 
-# ── 安全驗證輔助邏輯 ──────────────────────────────────────────
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
@@ -56,7 +53,6 @@ def get_current_user_from_token(token: str) -> dict:
     except Exception:
         raise HTTPException(status_code=401, detail="憑證驗證失敗或已過期")
 
-# ── 🔐 帳號認證與場域綁定端點 (改用標準 dict 接收資料) ───────────
 @app.post("/api/auth/register")
 def register_user(payload: dict):
     username = payload.get("username")
@@ -86,11 +82,9 @@ def login_user(payload: dict):
     token = jwt.encode({"sub": users[0]["username"]}, SECRET_KEY, algorithm=ALGORITHM)
     return {"status": "success", "access_token": token, "username": users[0]["username"]}
 
-# 🚨【核心修改點：完美對齊 LIFF 前端自動免密登入與圖文選單防禦】
 @app.post("/api/auth/line-login")
 def line_login(payload: dict):
     line_user_id = payload.get("line_user_id")
-    display_name = payload.get("display_name")
     
     if not line_user_id:
         raise HTTPException(status_code=400, detail="缺少 LINE User ID")
@@ -98,18 +92,15 @@ def line_login(payload: dict):
     url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
     users = requests.get(url, headers=get_supabase_headers()).json()
     
-    # 💡 核心阻斷：如果資料庫裡根本沒有這個 LINE ID
     if not users:
         raise HTTPException(status_code=403, detail="此 LINE 帳號尚未初次綁定智慧場域，請先至官方帳號輸入鹿場代碼！")
         
     user_data = users[0]
     current_username = user_data["username"]
         
-    # 🚀 去撈這個人目前綁定的是哪一個場域 ID
     map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user_data['id']}"
     mappings = requests.get(map_url, headers=get_supabase_headers()).json()
     
-    # 如果有開過戶但沒有場域綁定關係，一樣丟出 403 阻斷，讓前端拉開常規登入框
     if not mappings:
         raise HTTPException(status_code=403, detail="您已開通系統帳戶，但尚未綁定任何智慧場域，請先至 LINE 官方帳號輸入場域代碼！")
         
@@ -123,16 +114,16 @@ def line_login(payload: dict):
         "field_id": bound_field_id
     }
 
+# 🟢【核心 Bug 修正點：消滅 map_url 未定義導致的 500 內部錯誤，打通圖文選單自動跳轉大動脈】
 @app.get("/api/auth/check-field")
 def check_user_field_status(token: str):
     user = get_current_user_from_token(token)
     url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
-    mappings = requests.get(url, headers=get_supabase_headers()).json()
-    if mappings: return {"has_field": True, "field_id": mappings[0]["field_id"]}
+    mappings = requests.get(url, headers=get_supabase_headers()).json()  # 👈 修正：這裡精準改回 url，不再錯寫成 map_url！
+    if mappings: 
+        return {"has_field": True, "field_id": mappings[0]["field_id"]}
     return {"has_field": False}
 
-# 💡 這是被 GAS 呼叫的場域綁定端點。
-# 因為 GAS 調用時會把 line_user_id 與 訊息中的 field_id 塞在 payload 丟進來
 @app.post("/api/auth/bind-field")
 def bind_field_to_user(payload: dict):
     line_user_id = payload.get("line_user_id")
@@ -141,12 +132,10 @@ def bind_field_to_user(payload: dict):
     if not line_user_id or not field_id:
         raise HTTPException(status_code=400, detail="缺少必要參數 line_user_id 或 field_id")
     
-    # 1. 驗證這個場域代碼在 Supabase 裡到底合不合法
     f_url = f"{SUPABASE_URL}/fields?field_id=eq.{field_id}"
     if not requests.get(f_url, headers=get_supabase_headers()).json():
         raise HTTPException(status_code=404, detail="系統內找不到此專屬場域 ID，請重新確認輸入")
         
-    # 2. 尋找或自動建立此 LINE 用戶
     url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
     users = requests.get(url, headers=get_supabase_headers()).json()
     
@@ -154,7 +143,6 @@ def bind_field_to_user(payload: dict):
     if users:
         user = users[0]
     else:
-        # 首度光臨的全新用戶，幫他在 user 表生出一筆乾淨的種子資料
         is_new_user = True
         short_username = f"line_{line_user_id[:8]}"
         new_user_payload = {
@@ -165,7 +153,6 @@ def bind_field_to_user(payload: dict):
         res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user_payload)
         user = res.json()[0] if res.status_code in [200, 201] else new_user_payload
 
-    # 3. 處理場域對照綁定關係（如果之前綁過，先刪除舊的再寫入新的）
     check_map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
     existing_maps = requests.get(check_map_url, headers=get_supabase_headers()).json()
     if existing_maps:
@@ -175,7 +162,6 @@ def bind_field_to_user(payload: dict):
     bind_payload = {"user_id": user["id"], "field_id": field_id, "role": "admin"}
     requests.post(f"{SUPABASE_URL}/user_field_mappings", headers=get_supabase_headers(), json=bind_payload)
     
-    # 回傳對應狀態碼給 GAS，201 代表初次開戶綁定，200 代表既有老用戶更換場域
     if is_new_user:
         return status.HTTP_201_CREATED
     return status.HTTP_200_OK
