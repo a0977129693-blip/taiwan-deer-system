@@ -9,7 +9,6 @@
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body class="bg-[#f2efea] flex items-center justify-center min-h-screen p-4">
-    <!-- 預設隱藏，確認狀態後才會選擇性移除 hidden 顯現出來 -->
     <div id="appContent" class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border-t-8 border-[#8B6B4D] hidden">
         <div class="text-center mb-8">
             <h2 class="text-2xl font-black text-gray-800">智慧茸鹿管理平台</h2>
@@ -40,7 +39,6 @@
     <script>
         const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
 
-        // 常規網頁帳密登入流程
         document.getElementById('loginForm').onsubmit = async (e) => {
             e.preventDefault();
             const res = await fetch(`${API_BASE}/auth/login`, {
@@ -61,7 +59,6 @@
             }
         };
 
-        // 檢查該使用者目前有沒有綁定場域，決定跳轉去哪裡
         async function checkUserFieldStatus(token) {
             try {
                 const res = await fetch(`${API_BASE}/auth/check-field?token=${token}`);
@@ -77,29 +74,23 @@
             }
         }
 
-        // 🟢 核心修正：時序防堵死結，並精準控制圖文選單進來的自動登入阻斷機制
         function initLine() {
-            // ⚠️ 請確保後台的 Endpoint URL 尾巴 100% 登記的是 login.html 喔！
             liff.init({ liffId: "2010373192-WnuES7Ga" }) 
                 .then(() => {
                     console.log("LIFF 初始化完成");
 
-                    // 綁定手動按鈕點擊事件
                     document.getElementById('lineLoginBtn').onclick = () => { 
                         if (!liff.isLoggedIn()) {
                             liff.login(); 
                         } else {
-                            // 使用者主動點擊按鈕，設定參數為 true，允許彈出警告提示
                             handleLineAuth(true); 
                         }
                     };
 
-                    // 🚨【核心修改需求】：使用者案圖文選單進來時（此時通常已在 LINE 內登入）
+                    // 從圖文選單進來時的自動判定
                     if (liff.isLoggedIn()) { 
-                        // 在背景安靜驗證是否有綁定場域，參數為 false 代表背景安靜執行
                         setTimeout(() => { handleLineAuth(false); }, 100); 
                     } else {
-                        // 未登入 LINE 狀態，直接掀開一般帳密登入框
                         showLoginForm();
                     }
                 })
@@ -109,8 +100,6 @@
                 });
         }
 
-        // 撈取 LINE Profiles 並撞擊後端
-        // isUserInitiated 為 true 代表是使用者自己手動點按鈕；false 代表是開網頁時系統自動在背景跑的
         async function handleLineAuth(isUserInitiated = false) {
             try {
                 const p = await liff.getProfile();
@@ -127,17 +116,15 @@
                 const data = await res.json();
                 
                 if (res.ok) {
-                    // 驗證成功且有綁定場域，存下憑證直奔看板頁面
                     localStorage.setItem('deer_token', data.access_token);
                     localStorage.setItem('deer_user', data.username);
                     checkUserFieldStatus(data.access_token);
                 } else {
-                    // ❌ 關鍵防禦：後端判定未綁定場域
+                    // ❌ 判定未綁定
                     if (isUserInitiated) {
-                        // 只有使用者手動按登入按鈕時才彈出 alert 提示
                         alert("⚠️ 存取失敗：" + (data.detail || "您的 LINE 帳號尚未初次綁定場域"));
                     }
-                    // 💡 圖文選單進來時，如果沒綁定場域則「直接出現常規登入頁面，不自動連動」
+                    // 💡 如果是背景自動靜態比對被退件，直接展開常規帳密登入頁，不打擾使用者
                     showLoginForm();
                 }
             } catch (err) {
@@ -146,12 +133,10 @@
             }
         }
 
-        // 打開常規帳密表單的輔助函式
         function showLoginForm() {
             document.getElementById('appContent').classList.remove('hidden');
         }
 
-        // 啟動大腦
         initLine();
     </script>
 </body>
