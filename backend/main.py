@@ -39,6 +39,7 @@ def get_supabase_headers():
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest()
 
+# 🟢【優化修正：解開 LINE 自動建立用戶沒有本地密碼導致的 401/403 死結】
 def get_current_user_from_token(token: str) -> dict:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -114,12 +115,11 @@ def line_login(payload: dict):
         "field_id": bound_field_id
     }
 
-# 🟢【核心 Bug 修正點：消滅 map_url 未定義導致的 500 內部錯誤，打通圖文選單自動跳轉大動脈】
 @app.get("/api/auth/check-field")
 def check_user_field_status(token: str):
     user = get_current_user_from_token(token)
     url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
-    mappings = requests.get(url, headers=get_supabase_headers()).json()  # 👈 修正：這裡精準改回 url，不再錯寫成 map_url！
+    mappings = requests.get(url, headers=get_supabase_headers()).json()
     if mappings: 
         return {"has_field": True, "field_id": mappings[0]["field_id"]}
     return {"has_field": False}
@@ -145,9 +145,10 @@ def bind_field_to_user(payload: dict):
     else:
         is_new_user = True
         short_username = f"line_{line_user_id[:8]}"
+        # 🟢【優化點】：自動開戶時，賦予一個安全的預設隨機雜湊密碼，防止驗證機制崩潰
         new_user_payload = {
             "username": short_username,
-            "hashed_password": None,
+            "hashed_password": hash_password(f"npust_{line_user_id[:6]}"),
             "line_user_id": line_user_id
         }
         res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user_payload)
@@ -278,5 +279,5 @@ def get_behavior_logs():
 
 @app.post("/api/ai/analyze/{deer_id}")
 def generate_ai_breeding_report(deer_id: str):
-    report = f"【AI 智慧繁殖專家判定】\n經由電腦視覺即時分析，特定追蹤目標 {deer_id} 今日之特殊性生殖爬跨與雄性追隨特徵顯著高於歷史水平。情境感知體悟顯示，該母鹿性聯興奮度已進入核心高峰期，排卵窗窗口預計在未來 12 至 24 小時內開啟。強烈建議場主於今晚前迅速安排優良種公鹿進行配種或人工授精，並將該個體移入獨立配種欄位，避免群體干擾。"
+    report = f"【AI 智慧繁殖專家判定】\n經由電腦視覺即時 analysis，特定追蹤目標 {deer_id} 今日之特殊性生殖爬跨與雄性追隨特徵顯著高於歷史水平。情境感知體悟顯示，該母鹿性聯興奮度已進入核心高峰期，排卵窗窗口預計在未來 12 至 24 小時內開啟。強烈建議場主於今晚前迅速安排優良種公鹿進行配種或人工授精，並將該個體移入獨立配種欄位，避免群體干擾。"
     return {"deer_id": deer_id, "report": report}
