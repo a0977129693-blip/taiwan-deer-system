@@ -6,22 +6,8 @@ import logging
 import hashlib
 import jwt
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException, Depends, status, Request, Header
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-
-# ── 引入 LINE v3 SDK 相關套件 ──────────────────────────────────
-from linebot.v3.webhook import WebhookHandler
-from linebot.v3.webhooks import MessageEvent, FollowEvent
-from linebot.v3.messaging import (
-    Configuration,
-    ApiClient,
-    MessagingApi,
-    ReplyMessageRequest,
-    TextMessage,
-    QuickReply,
-    QuickReplyItem,
-    MessageAction
-)
 
 # ── 啟動診斷日誌 ──────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)
@@ -43,13 +29,6 @@ ALGORITHM = "HS256"
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://mdnthhgbcpmylulmnzwk.supabase.co/rest/v1")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
-
-# ── 💬 LINE 官方帳號 Webhook 配置 ──────────────────────────────
-LINE_CHANNEL_SECRET = os.getenv("LINE_CHANNEL_SECRET", "YOUR_CHANNEL_SECRET")
-LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "YOUR_CHANNEL_ACCESS_TOKEN")
-
-line_config = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 def get_supabase_headers():
     return {
@@ -76,57 +55,6 @@ def get_current_user_from_token(token: str) -> dict:
         return users[0]
     except Exception:
         raise HTTPException(status_code=401, detail="憑證驗證失敗或已過期")
-
-# ── 💬 接收 LINE 官方帳號 Webhook 的端點 ────────────────────────
-@app.post("/api/callback")
-async def callback(request: Request, x_line_signature: str = Header(None)):
-    if not x_line_signature:
-        raise HTTPException(status_code=400, detail="缺少 LINE 簽章")
-    
-    body = await request.body()
-    body_str = body.decode('utf-8')
-    
-    try:
-        handler.handle(body_str, x_line_signature)
-    except Exception as e:
-        logger.error(f"Webhook 處理失敗: {e}")
-        raise HTTPException(status_code=400, detail="簽章驗證失敗")
-        
-    return 'OK'
-
-# 🟢【核心改動：當使用者加入官方 LINE 好友時自動發送引導與快捷按鈕】
-@handler.add(FollowEvent)
-def handle_follow(event: FollowEvent):
-    reply_token = event.reply_token
-    
-    # 1. 撰寫防呆引導訊息
-    welcome_text = (
-        "🦌 歡迎使用「智慧茸鹿管理系統」！\n\n"
-        "為了連動您的屏科大水鹿場域數據，請在下方對話框輸入您的【場域識別代號】。\n\n"
-        "💡 提示：您可以直接點擊下方的快捷鍵，系統會自動為您填寫開頭，您只需在後面補上您的專屬代碼並發送即可！"
-    )
-    
-    # 2. 💡 建立文字快捷鍵 (Quick Reply)，精準對齊要求設定為 FIELD_NPUST_
-    quick_reply_box = QuickReply(
-        items=[
-            QuickReplyItem(
-                action=MessageAction(
-                    label="自動帶入場域格式",
-                    text="FIELD_NPUST_"  # 👈 點擊後，聊天對話框會自動輸入此行文字
-                )
-            )
-        ]
-    )
-    
-    # 3. 透過 LINE API 回傳訊息
-    with ApiClient(line_config) as api_client:
-        line_bot_api = MessagingApi(api_client)
-        line_bot_api.reply_message(
-            ReplyMessageRequest(
-                reply_token=reply_token,
-                messages=[TextMessage(text=welcome_text, quick_reply=quick_reply_box)]
-            )
-        )
 
 # ── 🔐 帳號認證與場域綁定端點 (改用標準 dict 接收資料) ───────────
 @app.post("/api/auth/register")
@@ -158,6 +86,7 @@ def login_user(payload: dict):
     token = jwt.encode({"sub": users[0]["username"]}, SECRET_KEY, algorithm=ALGORITHM)
     return {"status": "success", "access_token": token, "username": users[0]["username"]}
 
+# 🚨【核心修改點：完美對齊 LIFF 前端自動免密登入與圖文選單防禦】
 @app.post("/api/auth/line-login")
 def line_login(payload: dict):
     line_user_id = payload.get("line_user_id")
@@ -169,23 +98,18 @@ def line_login(payload: dict):
     url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
     users = requests.get(url, headers=get_supabase_headers()).json()
     
+    # 💡 核心阻斷：如果資料庫裡根本沒有這個 LINE ID
     if not users:
-        username_seed = display_name if display_name else f"line_{line_user_id[:8]}"
-        new_user = {
-            "username": username_seed, 
-            "hashed_password": None, 
-            "line_user_id": line_user_id
-        }
-        res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user)
-        user_data = res.json()[0] if res.status_code in [200, 201] else new_user
         raise HTTPException(status_code=403, detail="此 LINE 帳號尚未初次綁定智慧場域，請先至官方帳號輸入鹿場代碼！")
-    else:
-        user_data = users[0]
-        current_username = user_data["username"]
         
+    user_data = users[0]
+    current_username = user_data["username"]
+        
+    # 🚀 去撈這個人目前綁定的是哪一個場域 ID
     map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user_data['id']}"
     mappings = requests.get(map_url, headers=get_supabase_headers()).json()
     
+    # 如果有開過戶但沒有場域綁定關係，一樣丟出 403 阻斷，讓前端拉開常規登入框
     if not mappings:
         raise HTTPException(status_code=403, detail="您已開通系統帳戶，但尚未綁定任何智慧場域，請先至 LINE 官方帳號輸入場域代碼！")
         
@@ -207,31 +131,41 @@ def check_user_field_status(token: str):
     if mappings: return {"has_field": True, "field_id": mappings[0]["field_id"]}
     return {"has_field": False}
 
+# 💡 這是被 GAS 呼叫的場域綁定端點。
+# 因為 GAS 調用時會把 line_user_id 與 訊息中的 field_id 塞在 payload 丟進來
 @app.post("/api/auth/bind-field")
-def bind_field_to_user(payload: dict, token: str):
+def bind_field_to_user(payload: dict):
     line_user_id = payload.get("line_user_id")
-    
-    if line_user_id:
-        url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
-        users = requests.get(url, headers=get_supabase_headers()).json()
-        if users:
-            user = users[0]
-        else:
-            short_username = f"line_{line_user_id[:8]}"
-            url_alt = f"{SUPABASE_URL}/users?username=eq.{short_username}"
-            users_alt = requests.get(url_alt, headers=get_supabase_headers()).json()
-            user = users_alt[0] if users_alt else {"id": 1}
-    else:
-        user = get_current_user_from_token(token)
-    
     field_id = payload.get("field_id")
-    if not field_id:
-        raise HTTPException(status_code=400, detail="缺少 field_id 參數")
     
+    if not line_user_id or not field_id:
+        raise HTTPException(status_code=400, detail="缺少必要參數 line_user_id 或 field_id")
+    
+    # 1. 驗證這個場域代碼在 Supabase 裡到底合不合法
     f_url = f"{SUPABASE_URL}/fields?field_id=eq.{field_id}"
     if not requests.get(f_url, headers=get_supabase_headers()).json():
         raise HTTPException(status_code=404, detail="系統內找不到此專屬場域 ID，請重新確認輸入")
         
+    # 2. 尋找或自動建立此 LINE 用戶
+    url = f"{SUPABASE_URL}/users?line_user_id=eq.{line_user_id}"
+    users = requests.get(url, headers=get_supabase_headers()).json()
+    
+    is_new_user = False
+    if users:
+        user = users[0]
+    else:
+        # 首度光臨的全新用戶，幫他在 user 表生出一筆乾淨的種子資料
+        is_new_user = True
+        short_username = f"line_{line_user_id[:8]}"
+        new_user_payload = {
+            "username": short_username,
+            "hashed_password": None,
+            "line_user_id": line_user_id
+        }
+        res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=new_user_payload)
+        user = res.json()[0] if res.status_code in [200, 201] else new_user_payload
+
+    # 3. 處理場域對照綁定關係（如果之前綁過，先刪除舊的再寫入新的）
     check_map_url = f"{SUPABASE_URL}/user_field_mappings?user_id=eq.{user['id']}"
     existing_maps = requests.get(check_map_url, headers=get_supabase_headers()).json()
     if existing_maps:
@@ -239,9 +173,12 @@ def bind_field_to_user(payload: dict, token: str):
         requests.delete(delete_url, headers=get_supabase_headers())
 
     bind_payload = {"user_id": user["id"], "field_id": field_id, "role": "admin"}
-    res = requests.post(f"{SUPABASE_URL}/user_field_mappings", headers=get_supabase_headers(), json=bind_payload)
+    requests.post(f"{SUPABASE_URL}/user_field_mappings", headers=get_supabase_headers(), json=bind_payload)
     
-    return {"status": "success", "field_id": field_id, "user_bound": user.get("username")}
+    # 回傳對應狀態碼給 GAS，201 代表初次開戶綁定，200 代表既有老用戶更換場域
+    if is_new_user:
+        return status.HTTP_201_CREATED
+    return status.HTTP_200_OK
 
 # ── 🌲 模擬資料自動化注入端點 ──────────────────────────────────
 @app.post("/api/simulator/inject")
