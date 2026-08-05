@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臺灣水鹿姿態行為與發情偵測系統-行為紀錄管理</title>
+    <title>臺灣水鹿姿態行為與發情偵測系統 - 行為紀錄管理</title>
     <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,7 +18,7 @@
 </head>
 <body class="font-sans text-gray-700">
 
-    <!-- 頂部導覽列 (UI & UX 符合規範) -->
+    <!-- 頂部導覽列 -->
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
         <div class="px-4 md:px-6 h-20 flex items-center justify-between">
             <h1 class="text-base md:text-lg font-bold">臺灣水鹿姿態行為與發情偵測系統</h1>
@@ -30,12 +30,12 @@
                 <a href="4.html" class="nav-link flex items-center"><i class="fa-solid fa-chart-line mr-2 text-xs"></i>行為紀錄管理</a>
             </nav>
 
-            <!-- 管理員資訊 (姓名與頭像) -->
+            <!-- 管理員資訊 -->
             <div class="flex items-center space-x-3 border-l border-white/20 pl-6 cursor-pointer" onclick="logoutSystem()">
                 <div class="w-8 h-8 rounded-full bg-amber-200 text-[#8B6B4D] flex items-center justify-center font-bold text-sm shadow">
                     <i class="fa-solid fa-user"></i>
                 </div>
-                <span class="text-sm font-bold uppercase id-user-name">李仲琨</span>
+                <span class="text-sm font-bold uppercase id-user-name">kun</span>
             </div>
         </div>
 
@@ -48,7 +48,7 @@
     </header>
 
     <main class="max-w-7xl mx-auto p-4 md:p-8">
-        <!-- 彈出式即時預警 Toast (UX 即時反饋 & 警示通知) -->
+        <!-- 即時預警 Toast -->
         <div id="alertToast" class="hidden mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-md flex items-center justify-between animate-bounce">
             <div class="flex items-center space-x-3">
                 <div class="p-2 bg-red-500 text-white rounded-lg">
@@ -56,46 +56,50 @@
                 </div>
                 <div>
                     <h4 class="font-bold text-red-800 text-sm md:text-base">疑似發情 / 異常預警通知</h4>
-                    <p class="text-xs text-red-600" id="alertToastMsg">偵測到鹿隻 0x8210 近2小時活動量突增且伴隨深夜躁動與雄性追隨！</p>
+                    <p class="text-xs text-red-600" id="alertToastMsg">偵測到鹿隻 0x8210 行走時間與深夜躁動指標異常突增，請現場確認！</p>
                 </div>
             </div>
             <button onclick="document.getElementById('alertToast').classList.add('hidden')" class="text-red-400 hover:text-red-600 font-bold text-xs px-2 py-1">關閉</button>
         </div>
 
-        <!-- 資料指標卡片 (UI 行為紀錄與發情預警指標) -->
+        <!-- 資料指標卡片（四欄：活動指數、站立、趴臥、行走） -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8 text-center">
+            <!-- 1. 今日總活動指數（純數字，不亂給單位） -->
             <div class="bg-white p-4 md:p-6 rounded-2xl card-shadow border-l-4 border-green-500 flex flex-col justify-between">
-                <p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">今日總活動量</p>
-                <p id="stat-tot-act" class="text-2xl md:text-3xl font-black text-green-600 my-1">428 Index</p>
-                <span class="text-[10px] text-gray-400">基期門檻比：<span class="text-green-600 font-bold">+12%</span></span>
+                <p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">今日總活動指數</p>
+                <p id="stat-tot-act" class="text-2xl md:text-3xl font-black text-green-600 my-1">428</p>
+                <span class="text-[10px] text-gray-400">較歷史基期：<span class="text-green-600 font-bold">+12%</span></span>
             </div>
 
+            <!-- 2. 站立總時長 -->
             <div class="bg-white p-4 md:p-6 rounded-2xl card-shadow border-l-4 border-amber-400 flex flex-col justify-between">
                 <p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">站立總時長</p>
                 <p id="stat-stand-time" class="text-2xl md:text-3xl font-black text-amber-500 my-1">6.5 小時</p>
-                <span class="text-[10px] text-gray-400">佔今日比例：42%</span>
+                <span class="text-[10px] text-gray-400">佔每日比例：27%</span>
             </div>
 
+            <!-- 3. 趴臥總時長 -->
             <div class="bg-white p-4 md:p-6 rounded-2xl card-shadow border-l-4 border-blue-400 flex flex-col justify-between">
                 <p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">趴臥總時長</p>
-                <p id="stat-lie-time" class="text-2xl md:text-3xl font-black text-blue-500 my-1">9.2 小時</p>
-                <span class="text-[10px] text-gray-400">佔今日比例：58%</span>
+                <p id="stat-lie-time" class="text-2xl md:text-3xl font-black text-blue-500 my-1">14.2 小時</p>
+                <span class="text-[10px] text-gray-400">佔每日比例：59%</span>
             </div>
 
-            <div class="bg-white p-4 md:p-6 rounded-2xl card-shadow border-l-4 border-red-500 flex flex-col justify-between">
-                <p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">發情疑似指數</p>
-                <p id="stat-estrus-idx" class="text-2xl md:text-3xl font-black text-red-500 my-1">88 %</p>
-                <span class="text-[10px] text-red-500 font-bold">高風險 (突增+深夜躁動)</span>
+            <!-- 4. 行走總時長（新加入項目） -->
+            <div class="bg-white p-4 md:p-6 rounded-2xl card-shadow border-l-4 border-indigo-500 flex flex-col justify-between">
+                <p class="text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">行走總時長</p>
+                <p id="stat-walk-time" class="text-2xl md:text-3xl font-black text-indigo-600 my-1">3.3 小時</p>
+                <span class="text-[10px] text-indigo-500 font-bold">佔每日比例：14%</span>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <!-- 行為分析圖表 & 資料下載功能 (UX 易用的資料分析工具) -->
+            <!-- 行為分析圖表 & 資料下載 -->
             <div class="lg:col-span-2 bg-white p-4 md:p-8 rounded-2xl card-shadow">
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 sm:gap-0 mb-6">
                     <div>
                         <h2 class="text-base md:text-xl font-bold text-gray-800">歷史行為與環境趨勢圖</h2>
-                        <p class="text-xs text-gray-400 mt-0.5">即時追蹤活動量突增與溫濕度關聯性</p>
+                        <p class="text-xs text-gray-400 mt-0.5">即時追蹤活動量與溫濕度關聯性</p>
                     </div>
                     
                     <div class="flex items-center space-x-3 text-xs md:text-sm">
@@ -103,7 +107,6 @@
                             <label class="text-gray-400 whitespace-nowrap">鹿隻：</label>
                             <select id="deerFilter" class="bg-amber-50 border border-amber-200 text-[#8B6B4D] font-bold rounded-lg px-2.5 py-1.5 outline-none cursor-pointer"></select>
                         </div>
-                        <!-- 資料下載按鈕 (UX 功能) -->
                         <button onclick="downloadBehaviorCSV()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center">
                             <i class="fa-solid fa-download mr-1.5 text-xs"></i>匯出 CSV
                         </button>
@@ -113,7 +116,7 @@
                 <div id="activityChart" class="w-full" style="height: 330px;"></div>
             </div>
 
-            <!-- 即時行為日誌與 CV 監測流 (UX 即時反饋) -->
+            <!-- 即時行為日誌與 CV 監測流 -->
             <div class="bg-white p-4 md:p-6 rounded-2xl card-shadow border-l-4 border-[#8B6B4D] flex flex-col justify-between">
                 <div>
                     <div class="flex justify-between items-center mb-4">
@@ -141,7 +144,6 @@
     </main>
 
     <script>
-        // 設定登入管理員資訊
         document.querySelectorAll('.id-user-name').forEach(el => {
             el.innerText = localStorage.getItem('deer_user') || "李仲琨";
         });
@@ -149,25 +151,24 @@
         const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
         const activityChart = echarts.init(document.getElementById('activityChart'));
 
-        // 圖表配置：活動量 + 溫度 + 濕度
+        // ECharts 圖表配置
         const chartOption = {
             tooltip: { trigger: 'axis' },
-            legend: { data: ['活動量 (Index)', '環境溫度 (°C)', '環境濕度 (%RH)'], bottom: 0 },
+            legend: { data: ['活動指數 (Relative Index)', '環境溫度 (°C)', '環境濕度 (%RH)'], bottom: 0 },
             grid: { left: '3%', right: '4%', bottom: '12%', containLabel: true },
             xAxis: { type: 'category', data: ['08/01', '08/02', '08/03', '08/04', '08/05', '08/06 (今)'] },
             yAxis: [
-                { type: 'value', name: '活動指數', min: 0, max: 200, position: 'left' },
+                { type: 'value', name: '相對指數', min: 0, max: 200, position: 'left' },
                 { type: 'value', name: '溫濕度', min: 0, max: 100, position: 'right' }
             ],
             series: [
-                { name: '活動量 (Index)', type: 'line', data: [85, 92, 110, 95, 185, 172], smooth: true, lineStyle: { color: '#10b981', width: 3 }, itemStyle: { color: '#10b981' } },
+                { name: '活動指數 (Relative Index)', type: 'line', data: [85, 92, 110, 95, 185, 172], smooth: true, lineStyle: { color: '#10b981', width: 3 }, itemStyle: { color: '#10b981' } },
                 { name: '環境溫度 (°C)', type: 'line', yAxisIndex: 1, data: [26.5, 27.0, 28.2, 27.8, 29.1, 28.5], smooth: true, lineStyle: { color: '#ef4444', width: 2, type: 'dashed' }, itemStyle: { color: '#ef4444' } },
                 { name: '環境濕度 (%RH)', type: 'line', yAxisIndex: 1, data: [75, 78, 82, 80, 72, 76], smooth: true, lineStyle: { color: '#3b82f6', width: 2, type: 'dotted' }, itemStyle: { color: '#3b82f6' } }
             ]
         };
         activityChart.setOption(chartOption);
 
-        // 面板切換 (CV 監測流 vs AI 專家報告)
         function toggleStreamView(showStream) {
             const streamBox = document.getElementById('liveLogStream');
             const reportBox = document.getElementById('agentReportContainer');
@@ -187,20 +188,18 @@
             }
         }
 
-        // 資料更新與預警觸發機制
         async function pollRealtimeMetrics() {
             try {
                 const resEstrusLogs = await fetch(`${API_BASE}/estrus/logs`);
                 const logs = await resEstrusLogs.json();
                 const logBox = document.getElementById('liveLogStream');
                 
-                // 即時行為日誌渲染
                 logBox.innerHTML = logs.map(l => {
                     const isFO = l.behavior_type === 'FO' || l.behavior_type === 'Mounting';
                     return `
                     <div class="p-2.5 ${isFO ? 'bg-red-50/80 border-red-200' : 'bg-blue-50/60 border-blue-100/40'} rounded-xl border text-[11px] md:text-xs">
                         <div class="flex justify-between font-bold ${isFO ? 'text-red-600' : 'text-blue-600'} mb-1">
-                            <span>${l.behavior_type=='Mounting'?'疑似發情爬跨':l.behavior_type=='FO'?'雄性追隨 (FO)':l.behavior_type=='Standing'?'站立監測':l.behavior_type}</span>
+                            <span>${l.behavior_type=='Mounting'?'疑似發情爬跨':l.behavior_type=='FO'?'雄性追隨 (FO)':l.behavior_type=='Walking'?'行走監測':l.behavior_type=='Standing'?'站立監測':l.behavior_type}</span>
                             <span class="text-gray-400 font-mono">${l.time}</span>
                         </div>
                         <p class="text-gray-700 font-semibold">耳標晶片號: ${l.deer_id}</p>
@@ -208,7 +207,6 @@
                     </div>`;
                 }).join('');
 
-                // 觸發預警通知 Toast (當偵測到特殊追隨或突增時)
                 const hasAnomaly = logs.some(l => l.behavior_type === 'FO' || l.behavior_type === 'Mounting');
                 if (hasAnomaly) {
                     document.getElementById('alertToast').classList.remove('hidden');
@@ -216,7 +214,6 @@
             } catch (e) { console.error("同步資料失敗:", e); }
         }
 
-        // 綁定鹿隻選單
         async function bindDeerFilter() {
             try {
                 const res = await fetch(`${API_BASE}/deer`);
@@ -231,7 +228,6 @@
             } catch (e) { console.error("綁定選單失敗:", e); }
         }
 
-        // AI Agent 分析按鈕觸發
         document.getElementById('agentBtn').onclick = async () => {
             const deerId = document.getElementById('deerFilter').value || "0x8210";
             const btn = document.getElementById('agentBtn');
@@ -245,7 +241,7 @@
                 reportBox.innerText = data.report;
                 toggleStreamView(false);
             } catch (err) { 
-                reportBox.innerText = `【AI 專家診斷報告 - 鹿隻 ${deerId}】\n\n1. 活動量異常說明：近2小時活動量連續超過歷史基期門檻 180%，並於深夜出現頻繁走動紀錄。\n2. 行為特徵判定：偵測到 3 次「雄性追隨 (FO)」與 1 次疑似爬跨行為。\n3. 綜合評估：發情疑似指數高達 88%，極有可能處於發情高峰期，建議管理者立即進行現場確認與人工授精準備。`;
+                reportBox.innerText = `【AI 專家診斷報告 - 鹿隻 ${deerId}】\n\n1. 時間分配評估：本日站立 6.5小時 (27%)、趴臥 14.2小時 (59%)、行走 3.3小時 (14%)。\n2. 異常行走分析：行走時長較歷史基期增加 80%，且多集中於深夜 02:00-04:00。\n3. 行為判定：偵測到 2 次「雄性追隨 (FO)」與深夜躁動走動，發情疑似度極高，建議今日安排現場檢查。`;
                 toggleStreamView(false);
             }
             finally { 
@@ -254,13 +250,13 @@
             }
         };
 
-        // UX 匯出 CSV 功能
+        // CSV 下載（包含行走時長）
         function downloadBehaviorCSV() {
             const deerId = document.getElementById('deerFilter').value || "0x8210";
             const csvContent = "data:text/csv;charset=utf-8," 
-                + "日期,鹿隻編號,活動量指數,站立時長(hr),趴臥時長(hr),發情疑似指數,環境溫度(C),環境濕度(%)\n"
-                + `2026-08-05,${deerId},185,6.5,9.2,88%,28.5,76%\n`
-                + `2026-08-04,${deerId},95,4.2,12.1,15%,27.8,80%\n`;
+                + "日期,鹿隻編號,活動指數,站立時長(hr),趴臥時長(hr),行走時長(hr),環境溫度(C),環境濕度(%)\n"
+                + `2026-08-05,${deerId},185,6.5,14.2,3.3,28.5,76%\n`
+                + `2026-08-04,${deerId},95,4.2,18.0,1.8,27.8,80%\n`;
             
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
