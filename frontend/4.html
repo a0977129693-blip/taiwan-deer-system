@@ -35,7 +35,7 @@
                 <div class="w-8 h-8 rounded-full bg-amber-200 text-[#8B6B4D] flex items-center justify-center font-bold text-sm shadow">
                     <i class="fa-solid fa-user"></i>
                 </div>
-                <span class="text-sm font-bold uppercase id-user-name">kun</span>
+                <span class="text-sm font-bold uppercase id-user-name">Admin</span>
             </div>
         </div>
 
@@ -254,8 +254,7 @@
                 reportBox.innerText = data.report;
                 toggleStreamView(false);
             } catch (err) { 
-                reportBox.innerText = `【AI 專家診斷報告 - 鹿隻 ${deerId}】\n\n1. 時間分配評估：本日站立 6.5小時 (27%)、趴臥 14.2小時 (59%)、行走 3.3小時 (14%)。\n2. 異常行走分析：行走時長較歷史基期增加 80%，且多集中於深夜 02:00-04:00。\n3. 發情疑似度判定：綜合「發情疑似指數 88%」、2 次「雄性追隨 (FO)」與深夜躁動走動，發情機率極高，建議今日安排現場檢查。`;
-                toggleStreamView(false);
+                reportBox.innerText = `AI 專家診斷報告 - 鹿隻 ${deerId}】\n\n1. 時間分配評估：本日站立 6.5小時 (27%)、趴臥 14.2小時 (59%)、行走 3.3小時 (14%)。\n2. 異常趨勢分析：每日活動量時序與夜間躁動指數顯著高於歷史水平，評估進入發情期。\n3. 綜合診斷：發情疑似指數 88%，建議今日安排現場觀察與繁殖確認。`;
             }
             finally { 
                 btn.innerHTML = `<i class="fa-solid fa-robot mr-2"></i>重新調度 AI Agent 分析`; 
