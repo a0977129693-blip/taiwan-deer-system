@@ -152,7 +152,7 @@
 
     <script>
         document.querySelectorAll('.id-user-name').forEach(el => {
-            el.innerText = localStorage.getItem('deer_user') || "kun";
+            el.innerText = localStorage.getItem('deer_user') || "Admin";
         });
 
         const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
@@ -254,7 +254,7 @@
                 reportBox.innerText = data.report;
                 toggleStreamView(false);
             } catch (err) { 
-                reportBox.innerText = `AI 專家診斷報告 - 鹿隻 ${deerId}】\n\n1. 時間分配評估：本日站立 6.5小時 (27%)、趴臥 14.2小時 (59%)、行走 3.3小時 (14%)。\n2. 異常趨勢分析：每日活動量時序與夜間躁動指數顯著高於歷史水平，評估進入發情期。\n3. 綜合診斷：發情疑似指數 88%，建議今日安排現場觀察與繁殖確認。`;
+                reportBox.innerText = `【AI 專家診斷報告 - 鹿隻 ${deerId}】\n\n1. 時間分配評估：本日站立 6.5小時 (27%)、趴臥 14.2小時 (59%)、行走 3.3小時 (14%)。\n2. 異常趨勢分析：每日活動量時序與夜間躁動指數顯著高於歷史水平，評估進入發情期。\n3. 綜合診斷：發情疑似指數 88%，建議今日安排現場觀察與繁殖確認。`;
             }
             finally { 
                 btn.innerHTML = `<i class="fa-solid fa-robot mr-2"></i>重新調度 AI Agent 分析`; 
