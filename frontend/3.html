@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統 - 鹿隻資料登記</title>
+    <title>臺灣鹿繁殖與行為智慧辨識系統</title>
     <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,22 +22,22 @@
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
         <div class="px-4 md:px-6 h-20 flex items-center justify-between">
-            <h1 class="text-base md:text-lg font-bold leading-tight">臺灣鹿發情監測與繁殖管理系統</h1>
+            <h1 class="text-base md:text-lg font-bold leading-tight">臺灣鹿繁殖與行為智慧辨識系統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
-                <a href="3.html" class="nav-active flex items-center">鹿隻履歷登記</a>
-                <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
+                <a href="3.html" class="nav-active flex items-center">履歷登記</a>
+                <a href="4.html" class="nav-link flex items-center">行為記錄管理</a>
             </nav>
             <div class="flex items-center space-x-4 border-l border-white/20 pl-6 cursor-pointer" onclick="logoutSystem()">
-                <span class="text-sm font-bold uppercase id-user-name">李仲琨</span>
+                <span class="text-sm font-bold uppercase id-user-name">Admin</span>
             </div>
         </div>
         <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
             <a href="index.html" class="opacity-80 px-2 text-white">環境數據</a>
             <a href="2.html" class="opacity-80 px-2 text-white">鹿舍總覽</a>
             <a href="3.html" class="text-shadow-sm border-b-2 border-[#fcd34d] pb-0.5 px-2 text-[#fcd34d]">履歷登記</a>
-            <a href="4.html" class="opacity-80 px-2 text-white">發情管理</a>
+            <a href="4.html" class="opacity-80 px-2 text-white">行為紀錄</a>
         </div>
     </header>
 
@@ -64,7 +64,7 @@
 
     <script>
         document.querySelectorAll('.id-user-name').forEach(el => {
-            el.innerText = localStorage.getItem('deer_user') || "李仲琨";
+            el.innerText = localStorage.getItem('deer_user') || "Admin";
         });
 
         const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
