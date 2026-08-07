@@ -198,11 +198,35 @@ def get_current_environment():
 def get_environment_history():
     url = f"{SUPABASE_URL}/environmental_records?order=recorded_at.desc&limit=9"
     records = requests.get(url, headers=get_supabase_headers()).json()
+    
     if not records:
-        return {"times": ['06:00', '12:00', '18:00'], "temperatures": [21.4, 27.5, 23.4]}
+        return {
+            "times": ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+            "temperatures": [21.4, 20.8, 24.2, 28.5, 26.4, 23.1],
+            "humidities": [82.0, 85.0, 75.0, 62.0, 68.0, 76.0],
+            "lying": [3.5, 3.8, 2.1, 1.2, 2.0, 3.2],
+            "standing": [0.4, 0.1, 1.5, 2.2, 1.6, 0.7],
+            "walking": [0.1, 0.1, 0.4, 0.6, 0.4, 0.1]
+        }
+        
     records.reverse()
     times = [datetime.datetime.fromisoformat(r["recorded_at"].replace("Z", "+00:00")).strftime("%H:%M") for r in records]
-    return {"times": times, "temperatures": [float(r["temperature"]) for r in records]}
+    temperatures = [float(r.get("temperature", 24.0)) for r in records]
+    humidities = [float(r.get("humidity", 65.0)) for r in records]
+    
+    # 模擬鹿隻歷史姿態行為時長 (小時)
+    lying = [round(random.uniform(1.5, 3.8), 1) for _ in records]
+    standing = [round(random.uniform(0.5, 2.2), 1) for _ in records]
+    walking = [round(random.uniform(0.1, 0.8), 1) for _ in records]
+    
+    return {
+        "times": times,
+        "temperatures": temperatures,
+        "humidities": humidities,
+        "lying": lying,
+        "standing": standing,
+        "walking": walking
+    }
 
 @app.get("/api/deer")
 def get_all_deer():
