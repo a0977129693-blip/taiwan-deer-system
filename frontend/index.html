@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>應用電腦視覺技術之臺灣鹿發情監測與繁殖管理系統</title>
+    <title>臺灣鹿繁殖與行為智慧辨識系統</title>
     <script src="auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,12 +20,12 @@
 
     <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
         <div class="px-4 md:px-6 h-20 flex items-center justify-between">
-            <h1 class="text-base md:text-lg font-bold leading-tight">臺灣鹿發情監測與繁殖管理系統</h1>
+            <h1 class="text-base md:text-lg font-bold leading-tight">臺灣鹿繁殖與行為智慧辨識系統統</h1>
             <nav class="hidden xl:flex space-x-8 text-sm font-medium">
                 <a href="index.html" class="nav-active flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
                 <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
-                <a href="3.html" class="nav-link flex items-center">鹿隻履歷登記</a>
-                <a href="4.html" class="nav-link flex items-center">發情記錄管理</a>
+                <a href="3.html" class="nav-link flex items-center">履歷登記</a>
+                <a href="4.html" class="nav-link flex items-center">行為管理</a>
             </nav>
             <div class="flex items-center space-x-3 border-l border-white/20 pl-4 md:pl-6 cursor-pointer" onclick="logoutSystem()">
                 <div class="text-right">
@@ -77,7 +77,7 @@
     <script>
         // 動態將右上角的用戶名換成登入成功的帳號
         document.querySelectorAll('.id-user-name').forEach(el => {
-            el.innerText = localStorage.getItem('deer_user') || "李仲琨";
+            el.innerText = localStorage.getItem('deer_user') || "Admin";
         });
 
         const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
@@ -108,18 +108,41 @@
         }
 
         async function loadHistory() {
-            try {
-                const res = await fetch(`${API_BASE}/environment/history`);
-                const data = await res.json();
-                trendChart.setOption({
-                    tooltip: { trigger: 'axis' },
-                    grid: { left: '4%', right: '4%', bottom: '8%', containLabel: true },
-                    xAxis: { type: 'category', boundaryGap: false, data: data.times, axisLine: { lineStyle: { color: '#eee' } } },
-                    yAxis: { type: 'value', min: 15, max: 35, axisLabel: { formatter: '{value} °C' } },
-                    series: [{ name: '環境溫度', type: 'line', data: data.temperatures, smooth: true, lineStyle: { width: 3, color: '#3b82f6' }, itemStyle: { color: '#3b82f6' } }]
-                });
-            } catch (e) { console.error(e); }
-        }
+    try {
+        const res = await fetch(`${API_BASE}/environment/history`);
+        const data = await res.json();
+
+        // 數據備援機制
+        const times = data.times || ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
+        const temps = data.temperatures || [21.4, 20.8, 24.2, 28.5, 26.4, 23.1];
+        const hums = data.humidities || [82, 85, 75, 62, 68, 76];
+        const lying = data.lying || [3.5, 3.8, 2.1, 1.2, 2.0, 3.2];
+        const standing = data.standing || [0.4, 0.1, 1.5, 2.2, 1.6, 0.7];
+        const walking = data.walking || [0.1, 0.1, 0.4, 0.6, 0.4, 0.1];
+
+        trendChart.setOption({
+            tooltip: { trigger: 'axis' },
+            legend: { 
+                data: ['環境溫度 (°C)', '環境濕度 (%RH)', '趴臥時長 (hr)', '站立時長 (hr)', '行走時長 (hr)'], 
+                bottom: 0,
+                textStyle: { fontSize: 11 }
+            },
+            grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
+            xAxis: { type: 'category', boundaryGap: false, data: times, axisLine: { lineStyle: { color: '#ccc' } } },
+            yAxis: [
+                { type: 'value', name: '溫濕度', min: 0, max: 100, position: 'left' },
+                { type: 'value', name: '行為時長 (hr)', min: 0, max: 5, position: 'right' }
+            ],
+            series: [
+                { name: '環境溫度 (°C)', type: 'line', data: temps, smooth: true, lineStyle: { color: '#ef4444', width: 2 }, itemStyle: { color: '#ef4444' } },
+                { name: '環境濕度 (%RH)', type: 'line', data: hums, smooth: true, lineStyle: { color: '#06b6d4', width: 2, type: 'dashed' }, itemStyle: { color: '#06b6d4' } },
+                { name: '趴臥時長 (hr)', type: 'line', yAxisIndex: 1, data: lying, smooth: true, lineStyle: { color: '#3b82f6', width: 2 }, itemStyle: { color: '#3b82f6' } },
+                { name: '站立時長 (hr)', type: 'line', yAxisIndex: 1, data: standing, smooth: true, lineStyle: { color: '#f59e0b', width: 2 }, itemStyle: { color: '#f59e0b' } },
+                { name: '行走時長 (hr)', type: 'line', yAxisIndex: 1, data: walking, smooth: true, lineStyle: { color: '#6366f1', width: 2 }, itemStyle: { color: '#6366f1' } }
+            ]
+        });
+    } catch (e) { console.error("加載歷史趨勢圖失敗:", e); }
+}
 
         refreshDashboard();
         loadHistory();
