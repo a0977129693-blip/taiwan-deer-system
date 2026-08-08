@@ -20,26 +20,54 @@
 </head>
 <body class="font-sans text-gray-700">
 
-    <header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
-        <div class="px-4 md:px-6 h-20 flex items-center justify-between">
-            <h1 class="text-base md:text-lg font-bold leading-tight">臺灣鹿繁殖與行為智慧辨識系統</h1>
-            <nav class="hidden xl:flex space-x-8 text-sm font-medium">
-                <a href="index.html" class="nav-link flex items-center"><i class="fa-solid fa-house mr-2 text-xs"></i>首頁</a>
-                <a href="2.html" class="nav-link flex items-center">鹿舍總覽</a>
-                <a href="3.html" class="nav-link flex items-center">履歷登記</a>
-                <a href="4.html" class="nav-link flex items-center">行為記錄</a>
-            </nav>
-            <div class="flex items-center space-x-4 border-l border-white/20 pl-6 cursor-pointer" onclick="logoutSystem()">
-                <span class="text-sm font-bold uppercase id-user-name">Admin</span>
+    <!-- 頂部導覽列 Header -->
+<header class="sidebar-bg text-white shadow-md sticky top-0 z-50">
+    <div class="px-4 md:px-6 h-20 flex items-center justify-between">
+        
+        <!-- 系統標題 -->
+        <h1 class="text-base md:text-lg font-bold leading-tight flex items-center">
+            <i class="fa-solid fa-paw mr-2 text-amber-300"></i>
+            臺灣水鹿智慧繁殖與行為偵測系統
+        </h1>
+
+        <!-- 桌面版導覽選單 (XL 螢幕以上顯示) -->
+        <nav class="hidden xl:flex space-x-8 text-sm font-medium">
+            <!-- 說明：當前頁面請使用 class="nav-active"，非當前頁面使用 class="nav-link" -->
+            <a href="index.html" class="nav-link flex items-center">
+                <i class="fa-solid fa-house mr-2 text-xs"></i>首頁
+            </a>
+            <a href="2.html" class="nav-link flex items-center">
+                <i class="fa-solid fa-warehouse mr-2 text-xs"></i>鹿舍總覽
+            </a>
+            <a href="3.html" class="nav-active flex items-center">
+                <i class="fa-solid fa-id-card mr-2 text-xs"></i>履歷登記
+            </a>
+            <a href="4.html" class="nav-link flex items-center">
+                <i class="fa-solid fa-chart-line mr-2 text-xs"></i>行為紀錄
+            </a>
+        </nav>
+
+        <!-- 管理員資訊與登出區塊 -->
+        <div class="flex items-center space-x-3 border-l border-white/20 pl-4 md:pl-6 cursor-pointer group" onclick="logoutSystem()" title="點擊登出系統">
+            <div class="text-right hidden sm:block">
+                <p class="text-[10px] opacity-60 group-hover:opacity-100 transition-opacity">已登入（點此登出）</p>
+                <p class="text-xs md:text-sm font-bold uppercase id-user-name">Admin</p>
+            </div>
+            <div class="w-9 h-9 md:w-10 md:h-10 bg-amber-100 text-[#8B6B4D] rounded-full flex items-center justify-center shadow-inner group-hover:bg-amber-200 transition-colors">
+                <i class="fa-solid fa-user text-xs md:text-base"></i>
             </div>
         </div>
-        <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
-            <a href="index.html" class="opacity-80 px-2 text-white">環境資料</a>
-            <a href="2.html" class="opacity-80 px-2 text-white">鹿舍總覽</a>
-            <a href="3.html" class="text-shadow-sm border-b-2 border-[#fcd34d] pb-0.5 px-2 text-[#fcd34d]">履歷登記</a>
-            <a href="4.html" class="opacity-80 px-2 text-white">行為紀錄</a>
-        </div>
-    </header>
+    </div>
+
+    <!-- 行動版選單 (XL 螢幕以下顯示) -->
+    <div class="flex xl:hidden bg-[#72563D] text-xs font-bold justify-around py-2.5 border-t border-white/10">
+        <!-- 當前頁面標示：text-[#fcd34d] border-b-2 border-[#fcd34d] -->
+        <a href="index.html" class="opacity-80 hover:opacity-100 px-2 text-white">首頁</a>
+        <a href="2.html" class="opacity-80 hover:opacity-100 px-2 text-white">鹿舍總覽</a>
+        <a href="3.html" class="text-[#fcd34d] border-b-2 border-[#fcd34d] pb-0.5 px-2">履歷登記</a>
+        <a href="4.html" class="opacity-80 hover:opacity-100 px-2 text-white">行為紀錄</a>
+    </div>
+</header>
 
     <main class="max-w-3xl mx-auto p-4 md:p-8">
         <div class="form-card p-5 md:p-12">
