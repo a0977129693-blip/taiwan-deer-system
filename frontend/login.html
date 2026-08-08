@@ -53,7 +53,7 @@
             if(res.ok) {
                 localStorage.setItem('deer_token', data.access_token);
                 localStorage.setItem('deer_user', data.username);
-                checkUserFieldStatus(data.access_token);
+                window.location.href = 'index.html'; 
             } else { 
                 alert(data.detail || "登入失敗，帳密有誤"); 
             }
