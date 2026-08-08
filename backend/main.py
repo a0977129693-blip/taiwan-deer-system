@@ -59,17 +59,36 @@ def register_user(payload: dict):
     username = payload.get("username")
     password = payload.get("password")
     email = payload.get("email")
-    if not username or not password:
-        raise HTTPException(status_code=400, detail="帳號與密碼為必填項目")
+    name = payload.get("name")
+    field_id = payload.get("field_id")  # 安全驗證碼 (場域碼)
 
+    # 1. 必填欄位檢查
+    if not username or not password or not name or not field_id:
+        raise HTTPException(status_code=400, detail="帳號、密碼、姓名與安全驗證碼為必填項目")
+
+    # 2. 比對 fields 資料表有無該筆安全碼 (field_id)
+    field_check_url = f"{SUPABASE_URL}/fields?field_id=eq.{field_id}"
+    field_res = requests.get(field_check_url, headers=get_supabase_headers()).json()
+    if not field_res:
+        raise HTTPException(status_code=400, detail="安全驗證碼（場域碼）不正確或不存在，請確認後重試")
+
+    # 3. 檢查帳號是否重複
     check_url = f"{SUPABASE_URL}/users?username=eq.{username}"
     if requests.get(check_url, headers=get_supabase_headers()).json():
         raise HTTPException(status_code=400, detail="該管理員帳號已被註冊")
     
-    insert_payload = {"username": username, "hashed_password": hash_password(password), "email": email}
+    # 4. 寫入用戶資料 (包含 name 與 email)
+    insert_payload = {
+        "username": username, 
+        "hashed_password": hash_password(password), 
+        "email": email,
+        "name": name
+    }
     res = requests.post(f"{SUPABASE_URL}/users", headers=get_supabase_headers(), json=insert_payload)
-    if res.status_code not in [200, 201]: raise HTTPException(status_code=500, detail="資料庫寫入失敗")
-    return {"status": "success"}
+    if res.status_code not in [200, 201]: 
+        raise HTTPException(status_code=500, detail="資料庫寫入失敗")
+        
+    return {"status": "success", "message": "註冊成功"}
 
 @app.post("/api/auth/login")
 def login_user(payload: dict):
