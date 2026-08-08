@@ -3,39 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臺灣鹿繁殖與行為智慧辨識系統</title>
+    <title>臺灣水鹿智慧繁殖與行為偵測系統 - 註冊</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#f2efea] flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl">
-        <h2 class="text-2xl font-black text-gray-800 text-center mb-6">註冊管理員帳戶</h2>
-        <form id="regForm" class="space-y-4">
+<body class="bg-[#f2efea] flex items-center justify-center min-h-screen p-4 font-sans text-gray-700">
+
+    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border-t-8 border-[#8B6B4D]">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-black text-gray-800">註冊帳號</h2>
+            <p class="text-xs text-gray-400 mt-1">請輸入資料</p>
+        </div>
+
+        <form id="registerForm" class="space-y-4">
+            <!-- 1. 安全驗證碼 (場域代碼) -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 mb-1">管理者用戶名</label>
-                <input type="text" id="username" required class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]">
+                <label class="block text-xs font-bold text-amber-800 mb-1">
+                    <i class="fa-solid fa-key mr-1"></i>安全驗證碼 (場域代碼)
+                </label>
+                <input type="text" id="field_id" required 
+                    class="w-full px-4 py-2.5 border border-amber-300 bg-amber-50 rounded-xl text-sm font-mono uppercase tracking-wider text-center outline-none focus:ring-2 focus:ring-amber-400" 
+                    placeholder="例如: FIELD_NPUST_01">
             </div>
+
+            <!-- 2. 姓名 -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 mb-1">電子郵件</label>
-                <input type="email" id="email" class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]" placeholder="optional">
+                <label class="block text-xs font-bold text-gray-600 mb-1">
+                    <i class="fa-solid fa-user mr-1"></i>真實姓名
+                </label>
+                <input type="text" id="name" required 
+                    class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]" 
+                    placeholder="請輸入姓名">
             </div>
+
+            <!-- 3. 管理員帳號 -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 mb-1">密碼</label>
-                <input type="password" id="password" required class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]">
+                <label class="block text-xs font-bold text-gray-600 mb-1">
+                    <i class="fa-solid fa-id-badge mr-1"></i>管理員帳號
+                </label>
+                <input type="text" id="username" required 
+                    class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]" 
+                    placeholder="設定登入帳號">
             </div>
-            <button type="submit" class="w-full py-3 bg-[#8B6B4D] text-white font-bold rounded-xl text-sm">確認註冊</button>
+
+            <!-- 4. 密碼 -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">
+                    <i class="fa-solid fa-lock mr-1"></i>密碼
+                </label>
+                <input type="password" id="password" required 
+                    class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]" 
+                    placeholder="設定登入密碼">
+            </div>
+
+            <!-- 5. 電子郵件 Email -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">
+                    <i class="fa-solid fa-envelope mr-1"></i>電子郵件 (Email)
+                </label>
+                <input type="email" id="email" required 
+                    class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none focus:border-[#8B6B4D]" 
+                    placeholder="example@mail.com">
+            </div>
+
+            <button type="submit" id="submitBtn" 
+                class="w-full py-3 bg-[#8B6B4D] text-white font-bold rounded-xl text-sm hover:bg-[#72563D] transition shadow-md">
+                確認安全碼並完成註冊
+            </button>
         </form>
-        <div class="text-center mt-4"><a href="login.html" class="text-xs text-gray-400 hover:underline">已有帳號？返回登入</a></div>
+
+        <div class="text-center mt-6">
+            <a href="login.html" class="text-xs text-[#8B6B4D] font-bold hover:underline">
+                <i class="fa-solid fa-arrow-left mr-1"></i>已有帳號？返回登入
+            </a>
+        </div>
     </div>
+
     <script>
         const API_BASE = "https://deer-backend-api-t940.onrender.com/api";
-        document.getElementById('regForm').onsubmit = async (e) => {
+
+        document.getElementById('registerForm').onsubmit = async (e) => {
             e.preventDefault();
-            const res = await fetch(`${API_BASE}/auth/register`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value, email: document.getElementById('email').value })
-            });
-            if(res.ok) { alert("註冊成功！自動引導至登入畫面。"); window.location.href = 'login.html'; }
-            else { const d = await res.json(); alert(d.detail || "註冊失敗"); }
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "驗證中...";
+
+            const payload = {
+                field_id: document.getElementById('field_id').value.trim().toUpperCase(),
+                name: document.getElementById('name').value.trim(),
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('password').value,
+                email: document.getElementById('email').value.trim()
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert("註冊驗證成功！請使用新建立的帳號密碼登入。");
+                    window.location.href = 'login.html';
+                } else {
+                    alert("註冊失敗：" + (data.detail || "安全驗證碼無效或帳號已存在"));
+                }
+            } catch (err) {
+                alert("無法連線至雲端伺服器，請檢查網路連線。");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "確認安全碼並完成註冊";
+            }
         };
     </script>
 </body>
