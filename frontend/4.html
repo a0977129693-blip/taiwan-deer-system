@@ -48,19 +48,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto p-4 md:p-8">
-        <!-- 即時預警 Toast -->
-        <div id="alertToast" class="hidden mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-md flex items-center justify-between animate-bounce">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-red-500 text-white rounded-lg">
-                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
-                </div>
-                <div>
-                    <h4 class="font-bold text-red-800 text-sm md:text-base">疑似發情 / 異常預警通知</h4>
-                    <p class="text-xs text-red-600" id="alertToastMsg">偵測到鹿隻 0x8210 行走時間與深夜躁動指標異常突增，請現場確認！</p>
-                </div>
-            </div>
-            <button onclick="document.getElementById('alertToast').classList.add('hidden')" class="text-red-400 hover:text-red-600 font-bold text-xs px-2 py-1">關閉</button>
-        </div>
 
         <!-- 資料指標卡片（五欄：活動指數、站立、趴臥、行走、發情疑似指數） -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6 md:mb-8 text-center">
@@ -95,7 +82,7 @@
             <!-- 5. 發情疑似指數（補回項） -->
             <div class="bg-white p-3.5 md:p-5 rounded-2xl card-shadow border-l-4 border-red-500 flex flex-col justify-between col-span-2 md:col-span-1">
                 <p class="text-[11px] md:text-xs text-gray-400 font-bold mb-1 uppercase tracking-wider">發情疑似指數</p>
-                <p id="stat-estrus-idx" class="text-xl md:text-2xl font-black text-red-500 my-1">88 %</p>
+                <p id="stat-estrus-idx" class="text-xl md:text-2xl font-black text-red-500 my-1">12 %</p>
                 <span class="text-[10px] text-red-500 font-bold">突增與深夜躁動觸發</span>
             </div>
         </div>
@@ -217,13 +204,10 @@
                 const hasAnomaly = logs.some(l => l.behavior_type === 'FO' || l.behavior_type === 'Mounting');
                 
                 // 動態更新發情疑似指數
-                const estrusIdx = hasAnomaly ? 88 : 12;
+                const estrusIdx = hasAnomaly ? 50 : 12;
                 const estrusElem = document.getElementById('stat-estrus-idx');
                 if (estrusElem) estrusElem.innerText = `${estrusIdx} %`;
 
-                if (hasAnomaly) {
-                    document.getElementById('alertToast').classList.remove('hidden');
-                }
             } catch (e) { console.error("同步資料失敗:", e); }
         }
 
